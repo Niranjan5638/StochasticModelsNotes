@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stochastic Models — Class Notes, Modules 1–3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf8f3;
+  --bg-glow:rgba(168,129,42,0.07);
+  --surface:#ffffff;
+  --surface2:#f4efe6;
+  --border:rgba(30,58,95,0.12);
+  --border-strong:rgba(30,58,95,0.24);
+  --text:#1d2733;
+  --text-dim:#6f6a60;
+  --navy:#1e3a5f;
+  --navy-dim:#eaf0f6;
+  --gold:#8f6b1f;
+  --gold-dim:#f8f0dc;
+  --sage:#47613f;
+  --sage-dim:#eef2e8;
+  --cran:#8f3a2d;
+  --cran-dim:#fbeae7;
+  --font-display:'Instrument Serif',Georgia,'Times New Roman',serif;
+  --font-body:'STIX Two Text',Georgia,'Times New Roman',serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#13171c;
+    --bg-glow:rgba(168,129,42,0.10);
+    --surface:#1a1f26;
+    --surface2:#212832;
+    --border:rgba(255,255,255,0.10);
+    --border-strong:rgba(255,255,255,0.20);
+    --text:#e5e1d8;
+    --text-dim:#9a958a;
+    --navy:#9dbcd8;
+    --navy-dim:rgba(110,150,190,0.13);
+    --gold:#d4a73a;
+    --gold-dim:rgba(212,167,58,0.11);
+    --sage:#9db98e;
+    --sage-dim:rgba(130,165,110,0.12);
+    --cran:#e0917f;
+    --cran-dim:rgba(200,110,90,0.13);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:
+    radial-gradient(900px 500px at 12% -8%, var(--bg-glow), transparent 70%),
+    var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:17.5px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:1320px;margin:0 auto;padding:0 40px 100px;
+  display:grid;grid-template-columns:250px minmax(0,1fr);gap:0 64px;
+}
+.main{min-width:0;max-width:820px}
+
+/* ---------- TOC ---------- */
+.toc{
+  position:sticky;top:0;align-self:start;grid-row:1/-1;
+  max-height:100dvh;overflow-y:auto;
+  padding:32px 0 40px;
+  border-right:1px solid var(--border);
+}
+.toc::-webkit-scrollbar{width:3px}
+.toc::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:2px}
+.toc-title{
+  font-family:var(--font-mono);font-size:9.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:2.2px;color:var(--text-dim);padding-bottom:12px;margin-bottom:6px;
+  border-bottom:1px solid var(--border);
+}
+.toc-mod{
+  font-family:var(--font-mono);font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.6px;color:var(--gold);margin:20px 0 6px;padding-left:9px;
+}
+.toc a{
+  display:block;font-size:11.5px;line-height:1.38;color:var(--text-dim);text-decoration:none;
+  padding:3px 9px;border-radius:0 4px 4px 0;border-left:2px solid transparent;
+  transition:color .15s,background .15s,border-color .15s;margin-bottom:1px;
+  font-family:var(--font-mono);letter-spacing:-0.15px;
+}
+.toc a:hover{color:var(--text);background:var(--surface2)}
+.toc a.active{color:var(--navy);border-left-color:var(--gold);background:var(--surface2);font-weight:500}
+
+/* ---------- hero ---------- */
+.hero{padding:76px 0 20px}
+.eyebrow{
+  font-family:var(--font-mono);font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:2.6px;color:var(--gold);margin-bottom:18px;
+}
+.hero h1{
+  font-family:var(--font-display);font-size:clamp(46px,7vw,76px);line-height:0.98;
+  font-weight:400;margin:0 0 10px;letter-spacing:-1.5px;color:var(--text);
+}
+.hero .sub{
+  font-family:var(--font-display);font-size:clamp(20px,2.6vw,27px);font-style:italic;
+  color:var(--text-dim);margin:0 0 30px;
+}
+.hero .lede{
+  font-size:18.5px;line-height:1.75;color:var(--text);max-width:62ch;margin:0 0 36px;
+}
+.hero .lede::first-letter{
+  font-family:var(--font-display);font-size:3.1em;float:left;line-height:0.82;
+  padding:6px 12px 0 0;color:var(--gold);
+}
+.mcards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.mcard{
+  background:var(--surface);border:1px solid var(--border);border-radius:3px;
+  padding:18px 18px 20px;border-top:2px solid var(--navy);
+}
+.mcard:nth-child(2){border-top-color:var(--gold)}
+.mcard:nth-child(3){border-top-color:var(--sage)}
+.mcard .mc-num{
+  font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:1.6px;
+  color:var(--text-dim);display:block;margin-bottom:10px;
+}
+.mcard h3{
+  font-family:var(--font-display);font-size:22px;font-weight:400;margin:0 0 9px;
+  line-height:1.1;letter-spacing:-0.2px;border:0;padding:0;color:var(--text);
+  text-transform:none;
+}
+.mcard p{font-size:12.5px;line-height:1.5;color:var(--text-dim);margin:0;font-family:var(--font-mono)}
+.rule{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:34px 0 0}
+
+/* ---------- module band ---------- */
+.module-band{
+  margin:92px 0 44px;padding:34px 0 30px;border-top:2px solid var(--text);
+  border-bottom:1px solid var(--border);
+}
+.module-kicker{
+  font-family:var(--font-mono);font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:2.8px;color:var(--gold);display:block;margin-bottom:14px;
+}
+.module-title{
+  font-family:var(--font-display);font-size:clamp(32px,4.4vw,50px);line-height:1.02;
+  font-weight:400;margin:0;letter-spacing:-1px;color:var(--text);
+}
+
+/* ---------- headings ---------- */
+.sec-head{
+  font-family:var(--font-display);font-size:clamp(24px,3vw,32px);font-weight:400;
+  line-height:1.2;letter-spacing:-0.4px;margin:64px 0 20px;padding-top:22px;
+  border-top:1px solid var(--border);color:var(--text);scroll-margin-top:20px;
+}
+h3{
+  font-family:var(--font-mono);font-size:12px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.3px;color:var(--navy);margin:34px 0 12px;
+}
+
+/* ---------- prose ---------- */
+p{margin:0 0 16px;text-align:justify;hyphens:auto}
+strong{font-weight:600}
+sup,sub{font-size:0.68em;line-height:0}
+sup sup,sub sub{font-size:0.78em}
+.eq{
+  text-align:center;margin:20px 0;padding:14px 16px;overflow-x:auto;
+  background:var(--surface2);border-radius:2px;font-size:1.02em;
+  border-left:2px solid var(--border-strong);
+}
+ul.bullets{margin:0 0 18px;padding-left:24px}
+ul.bullets li{margin-bottom:9px;padding-left:2px}
+ul.bullets li::marker{color:var(--gold);font-size:1.1em}
+.num-item{
+  display:grid;grid-template-columns:26px 1fr;gap:8px;margin:0 0 14px;
+}
+.num-item .num{
+  font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--gold);
+  padding-top:5px;
+}
+.num-item div p{margin:0 0 10px}
+.num-item > div > p:last-child{margin-bottom:0}
+
+/* ---------- callouts ---------- */
+.callout{
+  margin:24px 0;padding:16px 20px 17px;border-left:3px solid;border-radius:0 3px 3px 0;
+  font-size:0.98em;text-align:justify;
+}
+.clabel{font-weight:700;margin-right:2px}
+.callout.def{background:var(--navy-dim);border-color:var(--navy)}
+.callout.def .clabel{color:var(--navy)}
+.callout.thm{background:var(--sage-dim);border-color:var(--sage)}
+.callout.thm .clabel{color:var(--sage)}
+.callout.prop{background:var(--gold-dim);border-color:var(--gold)}
+.callout.prop .clabel{color:var(--gold)}
+.callout.note{background:var(--surface2);border-color:var(--border-strong)}
+.callout.note .clabel{color:var(--text-dim);font-family:var(--font-mono);font-size:.82em;text-transform:uppercase;letter-spacing:.08em}
+.callout.warn{background:var(--cran-dim);border-color:var(--cran)}
+.callout.warn .clabel{color:var(--cran);font-family:var(--font-mono);font-size:.82em;text-transform:uppercase;letter-spacing:.08em}
+
+.example{margin:26px 0;padding-left:20px;border-left:2px solid var(--gold)}
+.exlabel{
+  display:block;font-family:var(--font-mono);font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:8px;
+}
+.example p{margin:0 0 12px}
+.example p:last-child{margin-bottom:0}
+
+.proof{
+  margin:0 0 20px;padding:2px 0 2px 20px;border-left:2px dotted var(--border-strong);
+  font-size:0.97em;color:var(--text);text-align:justify;
+}
+.plabel{font-style:italic;color:var(--text-dim);font-weight:600;margin-right:3px}
+
+/* ---------- tables ---------- */
+.table-wrap{
+  margin:26px 0 30px;overflow-x:auto;border:1px solid var(--border);border-radius:3px;
+  background:var(--surface);
+}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:0.88em}
+thead th{
+  background:var(--navy);color:#fff;font-family:var(--font-mono);font-size:0.76em;
+  font-weight:700;text-transform:uppercase;letter-spacing:0.6px;text-align:left;
+  padding:11px 14px;vertical-align:bottom;line-height:1.35;
+}
+@media (prefers-color-scheme: dark){ thead th{color:#13171c} }
+tbody td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:top;line-height:1.5}
+tbody tr:nth-child(even) td{background:var(--surface2)}
+tbody tr:hover td{background:var(--gold-dim)}
+
+/* ---------- footer ---------- */
+.foot{
+  margin:100px 0 0;padding:26px 0 0;border-top:1px solid var(--border);
+  font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:0.3px;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:1000px){
+  .wrap{grid-template-columns:1fr;padding:0 22px 70px;gap:0}
+  .toc{
+    grid-row:auto;position:sticky;top:0;z-index:200;max-height:none;
+    display:flex;gap:4px;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    background:var(--bg);border-right:0;border-bottom:1px solid var(--border);
+    margin:0 -22px;padding:9px 22px;
+  }
+  .toc::-webkit-scrollbar{display:none}
+  .toc-title,.toc-mod{display:none}
+  .toc a{
+    white-space:nowrap;flex-shrink:0;border-left:0;border-bottom:2px solid transparent;
+    border-radius:4px 4px 0 0;padding:6px 10px;font-size:11px;margin-bottom:0;
+  }
+  .toc a.active{border-bottom-color:var(--gold);background:var(--surface2)}
+  .hero{padding:44px 0 14px}
+  .mcards{grid-template-columns:1fr}
+  .sec-head{scroll-margin-top:56px}
+  p{text-align:left}
+}
+@media print{
+  .toc{display:none}
+  .wrap{grid-template-columns:1fr;padding:0;max-width:none}
+  .main{max-width:none}
+  body{font-size:10.5pt;background:#fff;color:#000}
+  .module-band{break-before:page;margin-top:0}
+  .hero{break-after:page}
+  .callout,.example,.table-wrap,.eq{break-inside:avoid}
+  .sec-head{break-after:avoid}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc" id="toc">
+  <div class="toc-title">Contents</div>
+  <div class="toc-mod">Module 1</div><a href="#s1">1.1  Random Experiments, Sample Spaces and Events</a><a href="#s2">1.2  The Algebra of Events and Sigma-Fields</a><a href="#s3">1.3  Probability Measures and the Axioms of Probability</a><a href="#s4">1.4  Properties of Probability Measures</a><a href="#s5">1.5  Combinatorial Methods in Probability</a><a href="#s6">1.6  Conditional Probability</a><a href="#s7">1.7  Independence</a><a href="#s8">1.8  The Theorem of Total Probability</a><a href="#s9">1.9  Bayes’ Theorem</a><a href="#s10">1.10  Worked Examples</a><a href="#s11">1.11  Practice Problems with Solutions</a><a href="#s12">1.12  Formula Summary</a><div class="toc-mod">Module 2</div><a href="#s13">2.1  Random Variables: Definition and Interpretation</a><a href="#s14">2.2  Types of Random Variables</a><a href="#s15">2.3  Probability Mass Functions</a><a href="#s16">2.4  Probability Density Functions</a><a href="#s17">2.5  The Cumulative Distribution Function</a><a href="#s18">2.6  Expectation, Moments and Variance</a><a href="#s19">2.7  Transformation of a Single Random Variable</a><a href="#s20">2.8  Worked Examples</a><a href="#s21">2.9  Practice Problems with Solutions</a><a href="#s22">2.10  Formula Summary</a><div class="toc-mod">Module 3</div><a href="#s23">3.1  Joint Distributions of Two Random Variables</a><a href="#s24">3.2  Marginal Distributions</a><a href="#s25">3.3  Conditional Distributions and Conditional Expectation</a><a href="#s26">3.4  Independence of Random Variables</a><a href="#s27">3.5  Transformation of Random Vectors and the Jacobian</a><a href="#s28">3.6  Convolution: the Distribution of a Sum</a><a href="#s29">3.7  Functions of Random Variables</a><a href="#s30">3.8  Joint Moments, Covariance and Correlation</a><a href="#s31">3.9  Moment Generating Functions</a><a href="#s32">3.10  Characteristic Functions</a><a href="#s33">3.11  Worked Examples</a><a href="#s34">3.12  Practice Problems with Solutions</a><a href="#s35">3.13  Formula Summary</a>
+</nav>
+
+<div class="main">
+
+<header class="hero">
+  <div class="eyebrow">Class Notes · Modules 1–3</div>
+  <h1>Stochastic Models</h1>
+  <p class="sub">Complete coverage of the mid-semester syllabus</p>
+  <p class="lede">A complete set of class notes for the first three modules of the mid-semester syllabus. Each module follows the same rhythm: definitions are stated precisely and set apart, results carry proofs where the proof is examinable or illuminating, and every abstract idea is followed by a worked example. Each closes with practice problems, full solutions, and a formula summary to revise from.</p>
+  <div class="mcards">
+    <div class="mcard"><span class="mc-num">Module 01</span><h3>Review of Probability Concepts</h3><p>Probability spaces, combinatorics, conditioning, Bayes</p></div>
+    <div class="mcard"><span class="mc-num">Module 02</span><h3>Random Variables</h3><p>PMF, PDF, CDF, expectation, variance, transformations</p></div>
+    <div class="mcard"><span class="mc-num">Module 03</span><h3>Multiple Random Variables</h3><p>Jacobians, convolution, conditional expectation, MGF and CF</p></div>
+  </div>
+  <div class="rule"></div>
+</header>
+
+<section class="content">
+<section class="module">
+  <div class="module-band">
+    <span class="module-kicker">Module 1</span>
+    <h1 class="module-title">Review of Probability Concepts</h1>
+  </div>
+<p>Probability theory begins with a deceptively simple question: how do we attach a number to the phrase "the chances are"? Everything in this module is machinery built to answer that question rigorously. We first construct the objects a probability model is made of — a sample space, a collection of events, and a probability measure — then develop the rules those objects must obey, and finally study the two ideas that make probability useful in practice: conditioning and independence. Almost every result later in the course, including Markov chains and stochastic processes, rests on the four results collected here: the properties of probability measures, the multiplication rule, the theorem of total probability, and Bayes’ theorem.</p>
+<h2 class="sec-head" id="s1">1.1  Random Experiments, Sample Spaces and Events</h2>
+<p>A <strong>random experiment</strong> (or random trial) is any procedure whose outcome cannot be predicted with certainty before it is performed, but which satisfies three conditions: the set of all possible outcomes is known in advance; the experiment can, at least in principle, be repeated under identical conditions; and although the individual outcome is unpredictable, the outcomes exhibit a regular pattern when the experiment is repeated many times. This last feature is what makes probability a mathematical subject rather than a matter of opinion — it is the empirical regularity that the axioms later formalise.</p>
+<div class="callout def"><span class="clabel">Definition 1.1 (Sample space).</span> The <strong>sample space</strong> of a random experiment is the set of all possible outcomes of the experiment. It is denoted by Ω (capital omega). An individual outcome ω ∈ Ω is called a <strong>sample point</strong>. The sample space is chosen by the modeller, not by nature: tossing a coin may be modelled as Ω = {H, T} or, if we also record the height of the toss, as a much larger set. A good sample space is the smallest one that records everything the question asks about.</div>
+<p>Sample spaces are classified by their size, and the classification matters because the tools available for computing probabilities differ from one class to the next.</p>
+<div class="table-wrap"><table><thead><tr><th>Type of sample space</th><th>Description</th><th>Typical example</th></tr></thead><tbody>
+<tr><td>Finite</td><td>Finitely many outcomes; every event has a well-defined count</td><td>Roll of a die: Ω = {1, 2, 3, 4, 5, 6}</td></tr>
+<tr><td>Countably infinite</td><td>Outcomes can be listed in a sequence (can be put in one-to-one correspondence with the natural numbers)</td><td>Number of tosses until the first head: Ω = {1, 2, 3, …}</td></tr>
+<tr><td>Uncountably infinite (continuous)</td><td>Outcomes form a continuum; single points have probability zero</td><td>Lifetime of a bulb: Ω = [0, ∞)</td></tr>
+</tbody></table></div>
+<div class="example"><span class="exlabel">Example 1.1</span><p>Write down a sample space for each experiment. (a) Tossing a coin twice. (b) Counting the number of calls arriving at a telephone exchange in one hour. (c) Measuring the time until a radioactive particle decays. (d) Observing the price of a stock at the close of trading.</p></div>
+<p>(a) Ω = {HH, HT, TH, TT}, finite with four points — note that we distinguish HT from TH because the tosses are ordered. (b) Ω = {0, 1, 2, 3, …}, countably infinite; the count has no theoretical upper bound. (c) Ω = (0, ∞), uncountable. (d) Ω = [0, ∞) measured in rupees, uncountable, though in practice prices are quoted to two decimal places and the space is then a very large finite set. Each of these choices is a modelling decision, and the same physical situation admits several correct answers.</p>
+<p>An <strong>event</strong> is a subset of the sample space: a statement about the outcome that is either true or false once the outcome is known. Event A <strong>occurs</strong> if the realised sample point ω lies in A. Two special events deserve names: Ω itself is the <strong>sure</strong> (or certain) event, and the empty set ∅ is the <strong>impossible</strong> event. A <strong>singleton</strong> { ω } is called an elementary event.</p>
+<p>Because events are sets, the language of set theory and the language of probability are two vocabularies for the same thing. The dictionary below should be automatic by the end of this module.</p>
+<div class="table-wrap"><table><thead><tr><th>Set notation</th><th>Probability reading</th></tr></thead><tbody>
+<tr><td>A ∪ B</td><td>A or B occurs (at least one of them)</td></tr>
+<tr><td>A ∩ B  (also written AB)</td><td>Both A and B occur</td></tr>
+<tr><td>A<sup>c</sup>  (or A′, Ā)</td><td>A does not occur — the complement of A in Ω</td></tr>
+<tr><td>A \ B  = A ∩ B<sup>c</sup></td><td>A occurs but B does not</td></tr>
+<tr><td>A ∩ B = ∅</td><td>A and B are <strong>mutually exclusive</strong> (disjoint): they cannot occur together</td></tr>
+<tr><td>A ⊆ B</td><td>Occurrence of A implies occurrence of B</td></tr>
+<tr><td>A<sub>1</sub> ∪ ⋯ ∪ A<sub>n</sub> = Ω with A<sub>i</sub> disjoint</td><td>The A<sub>i</sub> form an <strong>exhaustive</strong> collection of disjoint events (a partition of Ω)</td></tr>
+</tbody></table></div>
+<div class="callout thm"><span class="clabel">Theorem 1.1 (De Morgan’s laws).</span> For any events A and B in a sample space Ω,  (A ∪ B)<sup>c</sup> = A<sup>c</sup> ∩ B<sup>c</sup>   and   (A ∩ B)<sup>c</sup> = A<sup>c</sup> ∪ B<sup>c</sup>. More generally, for any indexed family {A<sub>i</sub>}, the complement of a union is the intersection of the complements, and vice versa.</div>
+<div class="proof"><span class="plabel">Proof.</span> Take ω ∈ (A ∪ B)<sup>c</sup>. Then ω is not in A ∪ B, so ω ∉ A and ω ∉ B, i.e. ω ∈ A<sup>c</sup> ∩ B<sup>c</sup>. Conversely if ω ∈ A<sup>c</sup> ∩ B<sup>c</sup> then ω is in neither A nor B, so ω ∉ A ∪ B. The two inclusions give equality. The second law follows by applying the first to A<sup>c</sup> and B<sup>c</sup> and taking complements of both sides; the general form is proved the same way, point by point.</div>
+<div class="callout note"><span class="clabel">Note</span> De Morgan’s laws are the single most useful algebraic tool in the subject, because "at least one" statements are hard to compute directly while "none" statements usually factor. The standard trick is: whenever a problem says "at least one", compute the probability of "none" and subtract from 1.</div>
+<h2 class="sec-head" id="s2">1.2  The Algebra of Events and Sigma-Fields</h2>
+<p>It is tempting to declare that <strong>every</strong> subset of Ω is an event. For finite and countable sample spaces this causes no difficulty. For continuous sample spaces it does: under the usual axioms of set theory one can construct subsets of, say, [0, 1] to which no sensible length can be assigned (Vitali’s example, which uses the axiom of choice). If such a set were admitted as an event we would be forced to assign it a probability that simultaneously satisfies and violates the axioms. The remedy is to restrict attention to a well-behaved collection of subsets — a sigma-field — large enough to contain everything we want to talk about, but not so large as to contain monsters.</p>
+<div class="callout def"><span class="clabel">Definition 1.2 (Field / algebra of events).</span> A collection 𝒦 of subsets of Ω is a <strong>field</strong> (or algebra) if: (i) Ω ∈ 𝒦; (ii) A ∈ 𝒦 ⇒ A<sup>c</sup> ∈ 𝒦; (iii) A, B ∈ 𝒦 ⇒ A ∪ B ∈ 𝒦. A field is closed under complementation and under finite unions.</div>
+<div class="callout def"><span class="clabel">Definition 1.3 (Sigma-field / sigma-algebra).</span> A collection 𝓕 of subsets of Ω is a <strong>sigma-field</strong> (σ-field, σ-algebra) on Ω if: (i) Ω ∈ 𝓕; (ii) A ∈ 𝓕 ⇒ A<sup>c</sup> ∈ 𝓕; (iii) if A<sub>1</sub>, A<sub>2</sub>, … ∈ 𝓕 then ⋃<sub>n=1</sub><sup>∞</sup> A<sub>n</sub> ∈ 𝓕. The pair (Ω, 𝓕) is called a <strong>measurable space</strong>, and the members of 𝓕 are called <strong>measurable sets</strong> or simply events.</div>
+<p>The only difference between the two definitions is condition (iii): a field tolerates finite unions, a σ-field tolerates countable ones. The stronger condition is needed precisely to prove the continuity properties of probability in Section 1.4, and those in turn are what make limiting arguments — the backbone of stochastic processes — legitimate.</p>
+<div class="callout prop"><span class="clabel">Proposition 1.2 (Consequences of the definition).</span> Let 𝓕 be a σ-field on Ω. Then: (a) ∅ ∈ 𝓕; (b) A, B ∈ 𝓕 ⇒ A \ B ∈ 𝓕; (c) 𝓕 is closed under countable intersections; (d) if A, B ∈ 𝓕 then A ∪ B, A ∩ B ∈ 𝓕.</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) ∅ = Ω<sup>c</sup> and Ω ∈ 𝓕, so by (ii) ∅ ∈ 𝓕. (b) A \ B = A ∩ B<sup>c</sup> = (A<sup>c</sup> ∪ B)<sup>c</sup>; both A<sup>c</sup> and B are in 𝓕, so their union is, and so is its complement. (c) By De Morgan, ⋂<sub>n</sub> A<sub>n</sub> = (⋃<sub>n</sub> A<sub>n</sub><sup>c</sup>)<sup>c</sup>; each A<sub>n</sub><sup>c</sup> ∈ 𝓕, the countable union is in 𝓕 by (iii), and the complement of that is in 𝓕. (d) Take the finite union to be a countable union with A<sub>n</sub> = ∅ for large n, then use (c).</div>
+<div class="example"><span class="exlabel">Example 1.2</span><p>List the σ-fields on Ω = {1, 2, 3}.</p></div>
+<p>The smallest is the <strong>trivial</strong> σ-field {∅, Ω}. The largest is the <strong>power set</strong> 2<sup>Ω</sup>, containing all 8 subsets. In between there are four σ-fields obtained by splitting Ω into a block of two points and a singleton: for instance {∅, {1}, {2, 3}, Ω}, and similarly for {2} and {3}. There are no others — a σ-field on a finite set always corresponds to a partition of Ω into "atoms", and there are exactly as many σ-fields as there are partitions (the Bell number B<sub>3</sub> = 5).</p>
+<div class="example"><span class="exlabel">Example 1.3</span><p>Show that if Ω is uncountable, the collection 𝒞 = {A ⊆ Ω : A is countable or A<sup>c</sup> is countable} is a σ-field, and that it is strictly smaller than 2<sup>Ω</sup>.</p></div>
+<p>Clearly Ω ∈ 𝒞 since Ω<sup>c</sup> = ∅ is countable, and the defining property is symmetric in A and A<sup>c</sup>, giving closure under complementation. For countable unions, let A<sub>1</sub>, A<sub>2</sub>, … ∈ 𝒞. If every A<sub>n</sub> is countable then ⋃ A<sub>n</sub> is countable. Otherwise some A<sub>k</sub> has countable complement, and then (⋃ A<sub>n</sub>)<sup>c</sup> = ⋂ A<sub>n</sub><sup>c</sup> ⊆ A<sub>k</sub><sup>c</sup> is countable. Either way the union lies in 𝒞. It is strictly smaller than 2<sup>Ω</sup> because Ω is uncountable and contains subsets that are neither countable nor co-countable (a Cantor-set-like construction, or simply a Bernstein set).</p>
+<div class="callout def"><span class="clabel">Definition 1.4 (Generated σ-field).</span> Let 𝒜 be any collection of subsets of Ω. The <strong>σ-field generated by 𝒜</strong>, written σ(𝒜), is the intersection of all σ-fields on Ω that contain 𝒜. This intersection is itself a σ-field (an easy check), it is the smallest σ-field containing 𝒜, and it always exists because 2<sup>Ω</sup> is one such σ-field.</div>
+<div class="callout def"><span class="clabel">Definition 1.5 (Borel σ-field).</span> On Ω = ℝ, the <strong>Borel σ-field</strong> 𝒱 is the σ-field generated by the collection of all open intervals: 𝒱 = σ({(a, b) : a &lt; b, a, b ∈ ℝ}). Its members are called <strong>Borel sets</strong>. The same definition works on ℝ<sup>n</sup>, using open rectangles or open balls.</div>
+<p>It is a pleasant fact that 𝒱 is also generated by each of the following collections: the closed intervals; the half-lines (-∞, x]; the open sets of ℝ; the rational intervals. This robustness is why in practice we never have to check measurability by hand — every set that arises from ordinary formulas involving intervals is Borel.</p>
+<div class="callout warn"><span class="clabel">Caution</span> For a countable sample space, take 𝓕 = 2<sup>Ω</sup> and forget about σ-fields. For a continuous sample space, take 𝓕 = 𝒱 (the Borel sets of ℝ or ℝ<sup>n</sup>) and likewise forget about it. The subtlety is real but, at the level of this course, it never bites.</div>
+<h2 class="sec-head" id="s3">1.3  Probability Measures and the Axioms of Probability</h2>
+<p>A σ-field tells us which questions we are allowed to ask. A probability measure answers them. The definition is due to A. N. Kolmogorov (1933) and its economy is its genius: three axioms, from which an entire theory follows deductively.</p>
+<div class="callout def"><span class="clabel">Definition 1.6 (Probability measure).</span> Let (Ω, 𝓕) be a measurable space. A <strong>probability measure</strong> is a function P : 𝓕 → ℝ satisfying: <strong>(Axiom 1 — non-negativity)</strong> P(A) ≥ 0 for every A ∈ 𝓕; <strong>(Axiom 2 — normalisation)</strong> P(Ω) = 1; <strong>(Axiom 3 — countable additivity)</strong> if A<sub>1</sub>, A<sub>2</sub>, … ∈ 𝓕 are pairwise disjoint, then P(⋃<sub>n=1</sub><sup>∞</sup> A<sub>n</sub>) = Σ<sub>n=1</sub><sup>∞</sup> P(A<sub>n</sub>).</div>
+<div class="callout def"><span class="clabel">Definition 1.7 (Probability space).</span> The triple (Ω, 𝓕, P) — sample space, σ-field of events, probability measure — is called a <strong>probability space</strong>. It is the complete mathematical model of a random experiment.</div>
+<div class="callout note"><span class="clabel">Note</span> Axiom 3 is the only one with any content. For finite sample spaces the "countable" is redundant: finite additivity would suffice, and the whole of classical probability can be developed from three much weaker statements. Countable additivity is what buys us the limit theorems, and hence all of stochastic processes.</div>
+<p>Three standard constructions show that the axioms are satisfied in the situations we care about.</p>
+<h3>The classical (equally likely) model</h3>
+<p>Let Ω be finite with N equally likely outcomes, 𝓕 = 2<sup>Ω</sup>, and define P(A) = |A| / N, where |A| denotes the number of elements of A. Axioms 1 and 2 are immediate (0 ≤ |A| ≤ N). For Axiom 3, if the A<sub>n</sub> are disjoint then |⋃ A<sub>n</sub>| = Σ |A<sub>n</sub>|, so dividing by N gives the result. This is the model behind all of combinatorics, and it is the reason Section 1.5 exists: in this model, computing a probability is counting.</p>
+<h3>The discrete model</h3>
+<p>Let Ω = {ω<sub>1</sub>, ω<sub>2</sub>, …} be countable, and let p<sub>1</sub>, p<sub>2</sub>, … ≥ 0 with Σ<sub>i</sub> p<sub>i</sub> = 1. Put P(A) = Σ<sub>i : ω<sub>i</sub> ∈ A</sub> p<sub>i</sub>. All three axioms hold, and any probability measure on a countable space arises this way. Note that this includes the classical model as the special case p<sub>i</sub> = 1/N.</p>
+<h3>The continuous model</h3>
+<p>Let Ω = ℝ, 𝓕 = 𝒱, and let f ≥ 0 be a function with ∫<sub>−∞</sub><sup>∞</sup> f(x) dx = 1. Define P(A) = ∫<sub>A</sub> f(x) dx. Non-negativity and normalisation are clear; countable additivity is the standard property of the integral over disjoint unions. Here P({x}) = 0 for every single point x, which shows that "probability zero" does not mean "impossible" — an idea that returns in Module 2.</p>
+<div class="example"><span class="exlabel">Example 1.4</span><p>Let Ω = {1, 2, 3, 4} and define P({1}) = 1/2, P({2}) = 1/4, P({3}) = 1/8, P({4}) = 1/8, extended additively to all subsets. Verify the axioms and compute P({1, 3}) and P({2, 3, 4}).</p></div>
+<p>Non-negativity is clear and the four values sum to 1/2 + 1/4 + 1/8 + 1/8 = 1, so Axioms 1 and 2 hold; finite additivity holds by construction, so all subsets are consistent. Then P({1, 3}) = 1/2 + 1/8 = 5/8 and P({2, 3, 4}) = 1/4 + 1/8 + 1/8 = 1/2. Observe that these two events are complementary and their probabilities sum to 1, as they must.</p>
+<div class="example"><span class="exlabel">Example 1.5</span><p>Show that P(A) = ∫<sub>A</sub> λ e<sup>−λx</sup> dx for A ⊆ [0, ∞) defines a probability measure on ([0, ∞), 𝒱), for λ &gt; 0.</p></div>
+<p>The integrand is non-negative, giving Axiom 1. Normalisation: ∫<sub>0</sub><sup>∞</sup> λ e<sup>−λx</sup> dx = [−e<sup>−λx</sup>]<sub>0</sub><sup>∞</sup> = 0 − (−1) = 1. Countable additivity follows because for disjoint A<sub>n</sub> the indicator functions add: 1<sub>⋃A<sub>n</sub></sub> = Σ 1<sub>A<sub>n</sub></sub>, and the monotone convergence theorem allows the sum to pass under the integral.</p>
+<h2 class="sec-head" id="s4">1.4  Properties of Probability Measures</h2>
+<p>Everything below is a theorem about any probability space whatever. Learn the statements and, for the starred ones, the proofs — they are routinely examined.</p>
+<div class="callout prop"><span class="clabel">Property P1.</span> P(∅) = 0.</div>
+<div class="proof"><span class="plabel">Proof.</span> Take A<sub>1</sub> = Ω and A<sub>n</sub> = ∅ for n ≥ 2. These are pairwise disjoint and their union is Ω. By Axiom 3, P(Ω) = P(Ω) + Σ<sub>n≥2</sub> P(∅), so Σ<sub>n≥2</sub> P(∅) = 0. Since every term is non-negative, P(∅) = 0.</div>
+<div class="callout prop"><span class="clabel">Property P2 (complement rule).</span> P(A<sup>c</sup>) = 1 − P(A) for every event A.</div>
+<div class="proof"><span class="plabel">Proof.</span> A and A<sup>c</sup> are disjoint with union Ω, so by finite additivity 1 = P(Ω) = P(A) + P(A<sup>c</sup>). Rearranging gives the result.</div>
+<div class="callout prop"><span class="clabel">Property P3 (boundedness).</span> 0 ≤ P(A) ≤ 1 for every event A.</div>
+<div class="proof"><span class="plabel">Proof.</span> The left inequality is Axiom 1. For the right, P(A) = 1 − P(A<sup>c</sup>) ≤ 1 because P(A<sup>c</sup>) ≥ 0.</div>
+<div class="callout prop"><span class="clabel">Property P4 (monotonicity).</span> If A ⊆ B then P(A) ≤ P(B), and in fact P(B \ A) = P(B) − P(A).</div>
+<div class="proof"><span class="plabel">Proof.</span> Write B as the disjoint union B = A ∪ (B \ A). By additivity, P(B) = P(A) + P(B \ A) ≥ P(A) since probabilities are non-negative. This also proves the stronger statement.</div>
+<div class="callout prop"><span class="clabel">Property P5 (addition rule for two events).</span> P(A ∪ B) = P(A) + P(B) − P(A ∩ B).</div>
+<div class="proof"><span class="plabel">Proof.</span> Decompose A ∪ B into the disjoint pieces A \ B, A ∩ B and B \ A. Then P(A ∪ B) = P(A \ B) + P(A ∩ B) + P(B \ A) = [P(A) − P(A ∩ B)] + P(A ∩ B) + [P(B) − P(A ∩ B)], which simplifies to the stated formula.</div>
+<div class="callout prop"><span class="clabel">Property P6 (inclusion–exclusion for three events).</span> P(A ∪ B ∪ C) = P(A) + P(B) + P(C) − P(A ∩ B) − P(A ∩ C) − P(B ∩ C) + P(A ∩ B ∩ C).</div>
+<div class="proof"><span class="plabel">Proof.</span> Apply Property P5 twice: first to (A ∪ B) and C, then to A and B, and finally use (A ∪ B) ∩ C = (A ∩ C) ∪ (B ∩ C) together with P5 once more. The signs alternate because each multiple overlap is subtracted once too often and must be restored.</div>
+<p>The general form, for events A<sub>1</sub>, …, A<sub>n</sub>, is</p>
+<div class="eq">P(⋃<sub>i=1</sub><sup>n</sup> A<sub>i</sub>) = Σ<sub>i</sub> P(A<sub>i</sub>) − Σ<sub>i&lt;j</sub> P(A<sub>i</sub> ∩ A<sub>j</sub>) + Σ<sub>i&lt;j&lt;k</sub> P(A<sub>i</sub> ∩ A<sub>j</sub> ∩ A<sub>k</sub>) − ⋯ + (−1)<sup>n+1</sup> P(A<sub>1</sub> ∩ ⋯ ∩ A<sub>n</sub>).</div>
+<p>The rule of signs is memorable: add the single events, subtract the pairs, add the triples, and continue alternating. Inclusion–exclusion is proved by induction on n, or more elegantly by expanding the product ∏<sub>i</sub> (1 − 1<sub>A<sub>i</sub></sub>) and using linearity of expectation — which is how it will be re-derived in Module 3.</p>
+<div class="callout prop"><span class="clabel">Property P7 (Boole’s inequality / countable subadditivity).</span> For any events A<sub>1</sub>, A<sub>2</sub>, … (not necessarily disjoint), P(⋃<sub>n</sub> A<sub>n</sub>) ≤ Σ<sub>n</sub> P(A<sub>n</sub>).</div>
+<div class="proof"><span class="plabel">Proof.</span> Disjointify: set B<sub>1</sub> = A<sub>1</sub> and B<sub>n</sub> = A<sub>n</sub> \ (A<sub>1</sub> ∪ ⋯ ∪ A<sub>n−1</sub>) for n ≥ 2. The B<sub>n</sub> are disjoint, ⋃ B<sub>n</sub> = ⋃ A<sub>n</sub>, and B<sub>n</sub> ⊆ A<sub>n</sub> so P(B<sub>n</sub>) ≤ P(A<sub>n</sub>) by monotonicity. Hence P(⋃ A<sub>n</sub>) = Σ P(B<sub>n</sub>) ≤ Σ P(A<sub>n</sub>).</div>
+<p>The next two properties are the ones that require countable additivity, and they are the reason the σ-field was introduced.</p>
+<div class="callout prop"><span class="clabel">Property P8 (continuity from below).</span> If A<sub>1</sub> ⊆ A<sub>2</sub> ⊆ ⋯ is an increasing sequence of events with ⋃<sub>n</sub> A<sub>n</sub> = A, then P(A<sub>n</sub>) → P(A) as n → ∞.</div>
+<div class="proof"><span class="plabel">Proof.</span> Set B<sub>1</sub> = A<sub>1</sub> and B<sub>n</sub> = A<sub>n</sub> \ A<sub>n−1</sub> for n ≥ 2. The B<sub>n</sub> are pairwise disjoint, ⋃<sub>k=1</sub><sup>n</sup> B<sub>k</sub> = A<sub>n</sub>, and ⋃<sub>k=1</sub><sup>∞</sup> B<sub>k</sub> = A. By countable additivity, P(A) = Σ<sub>k</sub> P(B<sub>k</sub>) = lim<sub>n→∞</sub> Σ<sub>k=1</sub><sup>n</sup> P(B<sub>k</sub>) = lim<sub>n→∞</sub> P(A<sub>n</sub>).</div>
+<div class="callout prop"><span class="clabel">Property P9 (continuity from above).</span> If A<sub>1</sub> ⊇ A<sub>2</sub> ⊇ ⋯ is a decreasing sequence with ⋂<sub>n</sub> A<sub>n</sub> = A, then P(A<sub>n</sub>) → P(A).</div>
+<div class="proof"><span class="plabel">Proof.</span> The complements A<sub>n</sub><sup>c</sup> increase to A<sup>c</sup>, so by P8, P(A<sub>n</sub><sup>c</sup>) → P(A<sup>c</sup>). Since P(A<sub>n</sub><sup>c</sup>) = 1 − P(A<sub>n</sub>) and P(A<sup>c</sup>) = 1 − P(A), the result follows. (Finiteness of P is used here; for infinite measures continuity from above can fail, which is why the proof goes through complements.)</div>
+<div class="callout note"><span class="clabel">Note</span> Continuity from above genuinely needs the finiteness of P. On ℝ with Lebesgue measure, the sets A<sub>n</sub> = [n, ∞) decrease to ∅, yet each has infinite measure. With a probability measure this pathology cannot occur.</div>
+<div class="example"><span class="exlabel">Example 1.6</span><p>In a class of 40 students, 25 study Mathematics, 20 study Physics, and 12 study both. Find the probability that a randomly chosen student studies at least one of the two subjects, and the probability of studying neither.</p></div>
+<p>Let M and P denote the two events. By Property P5, P(M ∪ P) = 25/40 + 20/40 − 12/40 = 33/40 = 0.825. The complement rule then gives P(neither) = 1 − 0.825 = 0.175, i.e. 7 students. Notice the check: |M \ P| = 13, |P \ M| = 8, |both| = 12, and 13 + 8 + 12 = 33, leaving 7.</p>
+<div class="example"><span class="exlabel">Example 1.7</span><p>Three events have P(A) = P(B) = P(C) = 1/2, P(A ∩ B) = P(B ∩ C) = P(A ∩ C) = 1/4, and P(A ∩ B ∩ C) = 1/8. Find P(A ∪ B ∪ C) and P(none occurs).</p></div>
+<p>By Property P6, P(A ∪ B ∪ C) = (1/2 + 1/2 + 1/2) − (1/4 + 1/4 + 1/4) + 1/8 = 3/2 − 3/4 + 1/8 = 7/8. Hence P(none) = 1/8. These numbers are consistent: the eight regions of the Venn diagram all carry probability 1/8, so the three events are mutually independent — a fact we will return to in Section 1.7.</p>
+<h2 class="sec-head" id="s5">1.5  Combinatorial Methods in Probability</h2>
+<p>In the classical model P(A) = |A|/|Ω|, so every probability question becomes two counting questions. This section collects the counting tools. The single most common error in the whole subject is to count the numerator and the denominator with different conventions; the cure is to fix one convention (ordered or unordered) and apply it to both.</p>
+<h3>1.5.1  The multiplication principle</h3>
+<p>If a task can be split into k successive stages, with n<sub>1</sub> choices at the first stage, n<sub>2</sub> at the second and so on regardless of earlier choices, then the total number of ways to complete the task is n<sub>1</sub> × n<sub>2</sub> × ⋯ × n<sub>k</sub>. Everything below is a corollary.</p>
+<div class="example"><span class="exlabel">Example 1.8</span><p>A licence plate consists of 2 letters followed by 4 digits. How many plates are possible if repetition is allowed, and how many if no letter or digit may repeat?</p></div>
+<p>With repetition: 26<sup>2</sup> × 10<sup>4</sup> = 676 × 10,000 = 6,760,000. Without repetition: 26 × 25 × 10 × 9 × 8 × 7 = 3,276,000.</p>
+<h3>1.5.2  Permutations — ordered arrangements without repetition</h3>
+<p>The number of ways to arrange r objects chosen from n distinct objects, order mattering and no repetition, is</p>
+<div class="eq"><sup>n</sup>P<sub>r</sub> = n(n−1)(n−2)⋯(n−r+1) = n! / (n−r)!,   0 ≤ r ≤ n.</div>
+<p>With r = n this gives n!, the number of orderings of all n objects. If repetitions are permitted, each of the r positions can be filled independently in n ways, giving n<sup>r</sup>. For <strong>circular</strong> arrangements of n distinct objects, the count is (n−1)!, because rotations are identified — fix one object to break the rotational symmetry. For necklaces, where reflections also coincide, the count is (n−1)!/2.</p>
+<p>When some of the n objects are <strong>indistinguishable</strong>, we divide out the internal orderings of each group. If there are n<sub>1</sub> objects of type 1, n<sub>2</sub> of type 2, …, n<sub>k</sub> of type k, with Σ n<sub>i</sub> = n, the number of distinct arrangements is the <strong>multinomial coefficient</strong></p>
+<div class="eq">n! / (n<sub>1</sub>! n<sub>2</sub>! ⋯ n<sub>k</sub>!).</div>
+<p>This is also the number of ways to split n distinct objects into k labelled groups of sizes n<sub>1</sub>, …, n<sub>k</sub> — the same number, read two ways. The <strong>binomial coefficient</strong> C(n, r) = n!/(r!(n−r)!) is the case k = 2.</p>
+<div class="example"><span class="exlabel">Example 1.9</span><p>How many distinct arrangements are there of the letters of MISSISSIPPI?</p></div>
+<p>The word has 11 letters: M once, I four times, S four times, P twice. The count is 11!/(1! 4! 4! 2!) = 39,916,800/(1 × 24 × 24 × 2) = 34,650.</p>
+<h3>1.5.3  Combinations — unordered selections without repetition</h3>
+<p>The number of ways to choose r objects from n distinct objects, order not mattering, is</p>
+<div class="eq">C(n, r) = \binom{n}{r} = n! / [r! (n−r)!].</div>
+<p>The link to permutations is <sup>n</sup>P<sub>r</sub> = r! C(n, r): each unordered selection of r objects can be ordered in r! ways. The binomial coefficients satisfy the <strong>Pascal identity</strong> C(n, r) = C(n−1, r−1) + C(n−1, r) (classify selections by whether a distinguished object is included), the symmetry C(n, r) = C(n, n−r), and the <strong>Vandermonde identity</strong> Σ<sub>k</sub> C(m, k) C(n, r−k) = C(m+n, r).</p>
+<p>The <strong>binomial theorem</strong>, Σ<sub>r=0</sub><sup>n</sup> C(n, r) x<sup>r</sup> y<sup>n−r</sup> = (x + y)<sup>n</sup>, is the combinatorial workhorse; putting x = y = 1 gives Σ<sub>r</sub> C(n, r) = 2<sup>n</sup>, the total number of subsets of an n-set, and putting x = 1, y = −1 gives Σ<sub>r</sub> (−1)<sup>r</sup> C(n, r) = 0.</p>
+<h3>1.5.4  Selections with repetition — stars and bars</h3>
+<p>The number of ways to choose r objects from n types, order not mattering and repetition allowed, is</p>
+<div class="eq">C(n + r − 1, r) = C(n + r − 1, n − 1).</div>
+<p>The argument is the "stars and bars" bijection: represent a selection by a string of r stars (the objects) and n − 1 bars (the separators between types). The number of such strings is the number of ways to place r stars in n + r − 1 positions. Equivalently, this is the number of non-negative integer solutions of x<sub>1</sub> + x<sub>2</sub> + ⋯ + x<sub>n</sub> = r.</p>
+<div class="example"><span class="exlabel">Example 1.10</span><p>In how many ways can 10 identical sweets be distributed among 4 children? How many ways if every child must get at least one?</p></div>
+<p>Unrestricted: the number of non-negative solutions of x<sub>1</sub> + ⋯ + x<sub>4</sub> = 10, which is C(13, 3) = 286. If each child gets at least one, put y<sub>i</sub> = x<sub>i</sub> − 1 ≥ 0; then Σ y<sub>i</sub> = 6 and the count is C(9, 3) = 84.</p>
+<h3>1.5.5  The sampling table</h3>
+<p>Four sampling schemes exhaust the common cases. "Ordered" means the sequence of draws is recorded; "with replacement" means an item can be drawn again.</p>
+<div class="table-wrap"><table><thead><tr><th></th><th>With replacement</th><th>Without replacement</th></tr></thead><tbody>
+<tr><td><strong>Ordered</strong></td><td>n<sup>r</sup></td><td>n! / (n − r)!</td></tr>
+<tr><td><strong>Unordered</strong></td><td>C(n + r − 1, r)</td><td>C(n, r)</td></tr>
+</tbody></table></div>
+<div class="callout note"><span class="clabel">Note</span> Read the table as a checklist before starting any counting problem: (1) Are the objects distinct? (2) Does order matter? (3) Is repetition allowed? Answering these three questions pins down the count.</div>
+<div class="example"><span class="exlabel">Example 1.11 (The birthday problem).</span><p>In a group of k people, what is the probability that at least two share a birthday? Assume 365 equally likely birthdays and ignore leap years.</p></div>
+<p>Compute the complement. The number of ways to assign birthdays so that all are distinct is 365 × 364 × ⋯ × (365 − k + 1); the total number of assignments is 365<sup>k</sup>. Hence</p>
+<div class="eq">P(at least one match) = 1 − [365 · 364 ⋯ (365 − k + 1)] / 365<sup>k</sup> = 1 − ∏<sub>j=0</sub><sup>k−1</sup> (1 − j/365).</div>
+<p>Using the approximation ln(1 − x) ≈ −x we get P ≈ 1 − exp(−k(k−1)/(2 · 365)). Setting this equal to 1/2 gives k(k − 1) ≈ 2 · 365 · ln 2 ≈ 506, so k ≈ 23. The exact value is P = 0.5073 at k = 23. The counterintuitive smallness of 23 is worth remembering: the number of <strong>pairs</strong> grows like k<sup>2</sup>, and it is pairs, not individuals, that collide.</p>
+<div class="example"><span class="exlabel">Example 1.12 (Poker hands).</span><p>A 5-card hand is dealt from a standard 52-card deck. Find the probability of (a) a flush (all five cards of one suit, not a straight), (b) a full house (three of one rank, two of another).</p></div>
+<p>The denominator in every case is C(52, 5) = 2,598,960, the number of unordered 5-card hands. (a) Choose the suit (4 ways) and then 5 of its 13 cards: 4 × C(13, 5) = 4 × 1287 = 5148. Excluding the 40 straight flushes gives 5108, so P ≈ 0.001965. (b) Choose the rank of the triple (13), its three suits C(4, 3) = 4, the rank of the pair (12), and its two suits C(4, 2) = 6: 13 × 4 × 12 × 6 = 3744, so P ≈ 0.001441.</p>
+<div class="example"><span class="exlabel">Example 1.13 (Derangements, for completeness).</span><p>n letters are placed at random into n addressed envelopes. Find the probability that no letter is in the correct envelope.</p></div>
+<p>Let A<sub>i</sub> be the event that letter i is correctly placed. Then P(A<sub>i</sub>) = 1/n, P(A<sub>i</sub> ∩ A<sub>j</sub>) = 1/[n(n−1)] for i ≠ j, and in general the intersection of k specified events has probability (n−k)!/n!. Inclusion–exclusion gives</p>
+<div class="eq">P(⋃ A<sub>i</sub>) = Σ<sub>k=1</sub><sup>n</sup> (−1)<sup>k+1</sup> C(n, k) (n−k)!/n! = Σ<sub>k=1</sub><sup>n</sup> (−1)<sup>k+1</sup> / k!  →  1 − e<sup>−1</sup>.</div>
+<p>Hence P(no correct placement) = Σ<sub>k=0</sub><sup>n</sup> (−1)<sup>k</sup>/k! → e<sup>−1</sup> ≈ 0.3679. Remarkably, the answer barely depends on n: whether there are 5 letters or 5000, the chance that nothing is in the right envelope is about 37%.</p>
+<h2 class="sec-head" id="s6">1.6  Conditional Probability</h2>
+<p>Unconditional probability answers "how likely is A?" Conditional probability answers the more informative question "how likely is A, given that I already know B happened?" The information changes the sample space: outcomes outside B are discarded and the remaining outcomes are renormalised.</p>
+<div class="callout def"><span class="clabel">Definition 1.8 (Conditional probability).</span> Let (Ω, 𝓕, P) be a probability space and let B ∈ 𝓕 with P(B) &gt; 0. The <strong>conditional probability of A given B</strong> is  P(A | B) = P(A ∩ B) / P(B).</div>
+<p>The restriction P(B) &gt; 0 is not a technicality: conditioning on an event of probability zero is undefined by this formula and requires the heavier machinery of regular conditional distributions. In continuous models we condition on events like {X &gt; t}, which have positive probability, rather than on the null event {X = t}.</p>
+<div class="callout prop"><span class="clabel">Proposition 1.3.</span> For a fixed B with P(B) &gt; 0, the map A ↦ P(A | B) is itself a probability measure on (Ω, 𝓕).</div>
+<div class="proof"><span class="plabel">Proof.</span> Non-negativity is clear. For normalisation, P(Ω | B) = P(Ω ∩ B)/P(B) = P(B)/P(B) = 1. For countable additivity, let A<sub>1</sub>, A<sub>2</sub>, … be disjoint. Then A<sub>n</sub> ∩ B are disjoint with union (⋃ A<sub>n</sub>) ∩ B, so P(⋃ A<sub>n</sub> | B) = P(⋃ (A<sub>n</sub> ∩ B))/P(B) = Σ P(A<sub>n</sub> ∩ B)/P(B) = Σ P(A<sub>n</sub> | B).</div>
+<p>This proposition is more useful than it looks: it says <strong>every</strong> property of probability measures established in Section 1.4 holds verbatim for conditional probabilities. For instance P(A<sup>c</sup> | B) = 1 − P(A | B), and P(A ∪ C | B) = P(A | B) + P(C | B) − P(A ∩ C | B).</p>
+<div class="callout thm"><span class="clabel">Theorem 1.4 (Multiplication rule).</span> For events A<sub>1</sub>, …, A<sub>n</sub> with P(A<sub>1</sub> ∩ ⋯ ∩ A<sub>n−1</sub>) &gt; 0,  P(A<sub>1</sub> ∩ A<sub>2</sub> ∩ ⋯ ∩ A<sub>n</sub>) = P(A<sub>1</sub>) P(A<sub>2</sub> | A<sub>1</sub>) P(A<sub>3</sub> | A<sub>1</sub> ∩ A<sub>2</sub>) ⋯ P(A<sub>n</sub> | A<sub>1</sub> ∩ ⋯ ∩ A<sub>n−1</sub>).</div>
+<div class="proof"><span class="plabel">Proof.</span> For n = 2 the statement is the definition rearranged. For general n, apply the n = 2 case repeatedly from the outside in: P(A<sub>1</sub> ∩ ⋯ ∩ A<sub>n</sub>) = P(A<sub>1</sub> ∩ ⋯ ∩ A<sub>n−1</sub>) P(A<sub>n</sub> | A<sub>1</sub> ∩ ⋯ ∩ A<sub>n−1</sub>), and expand the first factor recursively. The positivity hypothesis guarantees every conditional probability on the right is defined.</div>
+<div class="example"><span class="exlabel">Example 1.14</span><p>Two cards are drawn without replacement from a standard deck. Find the probability that both are aces.</p></div>
+<p>Let A<sub>1</sub> = first card is an ace, A<sub>2</sub> = second card is an ace. Then P(A<sub>1</sub>) = 4/52 and P(A<sub>2</sub> | A<sub>1</sub>) = 3/51, so by the multiplication rule P(A<sub>1</sub> ∩ A<sub>2</sub>) = (4/52)(3/51) = 12/2652 = 1/221 ≈ 0.00452. The same answer follows from counting: C(4,2)/C(52,2) = 6/1326 = 1/221.</p>
+<div class="example"><span class="exlabel">Example 1.15 (Tree diagrams).</span><p>An urn contains 3 red and 2 blue balls. Two are drawn without replacement. Find the probability that the second ball is red.</p></div>
+<p>Condition on the colour of the first draw: P(R<sub>2</sub>) = P(R<sub>1</sub>)P(R<sub>2</sub> | R<sub>1</sub>) + P(B<sub>1</sub>)P(R<sub>2</sub> | B<sub>1</sub>) = (3/5)(2/4) + (2/5)(3/4) = 6/20 + 6/20 = 12/20 = 3/5. The answer equals P(R<sub>1</sub>) — drawing without replacement does not change the marginal probability of the second draw, only its conditional probability given the first. This is the "symmetry" or exchangeability argument, and the tree diagram makes it visible: the two branches contribute 6/20 each.</p>
+<div class="callout note"><span class="clabel">Note</span> A tree diagram is the practical device for multi-stage experiments. Each edge carries a conditional probability given the path so far, the probability of a path is the product of its edge labels (multiplication rule), and the probability of an event is the sum over the paths that realise it (total probability). Drawing the tree is usually faster than manipulating formulas.</div>
+<h2 class="sec-head" id="s7">1.7  Independence</h2>
+<div class="callout def"><span class="clabel">Definition 1.9 (Independence of two events).</span> Events A and B are <strong>independent</strong> if  P(A ∩ B) = P(A) P(B).  If P(B) &gt; 0 this is equivalent to P(A | B) = P(A): knowing B occurred gives no information about A.</div>
+<p>Independence is a <strong>multiplicative</strong> property, not a statement about disjointness. In fact, if A and B are disjoint and both have positive probability, they are maximally <strong>dependent</strong> — the occurrence of one rules out the other. Confusing "disjoint" with "independent" is the most common conceptual error in the subject.</p>
+<div class="callout prop"><span class="clabel">Proposition 1.5.</span> If A and B are independent, then so are A and B<sup>c</sup>; A<sup>c</sup> and B; and A<sup>c</sup> and B<sup>c</sup>.</div>
+<div class="proof"><span class="plabel">Proof.</span> P(A ∩ B<sup>c</sup>) = P(A) − P(A ∩ B) = P(A) − P(A)P(B) = P(A)(1 − P(B)) = P(A)P(B<sup>c</sup>). The other cases follow by symmetry, and the last by applying the first result twice.</div>
+<div class="callout def"><span class="clabel">Definition 1.10 (Mutual independence of n events).</span> Events A<sub>1</sub>, …, A<sub>n</sub> are <strong>mutually independent</strong> if for every subset of indices {i<sub>1</sub>, …, i<sub>k</sub>} with k ≥ 2,  P(A<sub>i<sub>1</sub></sub> ∩ ⋯ ∩ A<sub>i<sub>k</sub></sub>) = P(A<sub>i<sub>1</sub></sub>) ⋯ P(A<sub>i<sub>k</sub></sub>).  There are 2<sup>n</sup> − n − 1 such conditions to check.</div>
+<div class="callout def"><span class="clabel">Definition 1.11 (Pairwise independence).</span> Events A<sub>1</sub>, …, A<sub>n</sub> are <strong>pairwise independent</strong> if P(A<sub>i</sub> ∩ A<sub>j</sub>) = P(A<sub>i</sub>) P(A<sub>j</sub>) for every pair i ≠ j.</div>
+<div class="callout warn"><span class="clabel">Caution</span> Pairwise independence does <strong>not</strong> imply mutual independence. The standard counterexample: toss two fair coins and let A = {first is H}, B = {second is H}, C = {the two coins show the same face}. Each pair satisfies P(A ∩ B) = 1/4 = P(A)P(B), P(A ∩ C) = 1/4 = P(A)P(C), and P(B ∩ C) = 1/4 = P(B)P(C), so the three are pairwise independent. But P(A ∩ B ∩ C) = P(HH) = 1/4, whereas P(A)P(B)P(C) = 1/8. Knowing any two of the events determines the third, so they are not mutually independent.</div>
+<div class="example"><span class="exlabel">Example 1.16 (Reliability of systems).</span><p>A system consists of three components in series, each working independently with probability p. Find the system reliability. Repeat for a parallel arrangement.</p></div>
+<p>In series the system works only if all three work: P = p<sup>3</sup>. In parallel the system fails only if all three fail: P = 1 − (1 − p)<sup>3</sup>. With p = 0.9 these give 0.729 and 0.999 respectively — redundancy is dramatically more effective than improving components. Note that both calculations use independence; without it, only the inequalities 1 − 3(1 − p) ≤ P(parallel) ≤ 3p would be available.</p>
+<div class="example"><span class="exlabel">Example 1.17</span><p>A and B are independent with P(A) = 0.4 and P(B) = 0.5. Find P(A ∪ B) and P(A | A ∪ B).</p></div>
+<p>P(A ∩ B) = 0.2, so P(A ∪ B) = 0.4 + 0.5 − 0.2 = 0.7. Then P(A | A ∪ B) = P(A ∩ (A ∪ B))/P(A ∪ B) = P(A)/P(A ∪ B) = 0.4/0.7 = 4/7 ≈ 0.571.</p>
+<h2 class="sec-head" id="s8">1.8  The Theorem of Total Probability</h2>
+<div class="callout def"><span class="clabel">Definition 1.12 (Partition).</span> A collection of events B<sub>1</sub>, B<sub>2</sub>, …, B<sub>n</sub> is a <strong>partition</strong> of Ω if the events are pairwise disjoint, each has positive probability, and their union is Ω. (The positivity is required so that the conditional probabilities below are defined; a countable partition is defined the same way with ⋃<sub>i=1</sub><sup>∞</sup>.)</div>
+<div class="callout thm"><span class="clabel">Theorem 1.6 (Total probability).</span> Let B<sub>1</sub>, …, B<sub>n</sub> be a partition of Ω and let A be any event. Then  P(A) = Σ<sub>i=1</sub><sup>n</sup> P(A | B<sub>i</sub>) P(B<sub>i</sub>).</div>
+<div class="proof"><span class="plabel">Proof.</span> The events A ∩ B<sub>1</sub>, …, A ∩ B<sub>n</sub> are pairwise disjoint, because the B<sub>i</sub> are, and their union is A ∩ (⋃ B<sub>i</sub>) = A ∩ Ω = A. Countable (here finite) additivity gives P(A) = Σ<sub>i</sub> P(A ∩ B<sub>i</sub>). Substituting P(A ∩ B<sub>i</sub>) = P(A | B<sub>i</sub>)P(B<sub>i</sub>) from the definition of conditional probability gives the result.</div>
+<p>The theorem says that a probability can be assembled from the conditional probabilities within each case, weighted by how likely each case is. It is the mathematical form of "break the problem into cases" and it is the engine behind every two-stage experiment.</p>
+<div class="example"><span class="exlabel">Example 1.18</span><p>Two factories supply bulbs. Factory 1 supplies 60% of stock and 2% of its bulbs are defective; Factory 2 supplies 40% and 5% are defective. A bulb is chosen at random. Find the probability it is defective.</p></div>
+<p>Let B<sub>1</sub>, B<sub>2</sub> be the events that the bulb came from factory 1 and 2, and let D be defective. Then P(D) = P(D | B<sub>1</sub>)P(B<sub>1</sub>) + P(D | B<sub>2</sub>)P(B<sub>2</sub>) = (0.02)(0.60) + (0.05)(0.40) = 0.012 + 0.020 = 0.032. About 3.2% of the total stock is defective — a weighted average of the two defect rates, weighted by supply share.</p>
+<div class="example"><span class="exlabel">Example 1.19 (A classic two-stage urn).</span><p>Urn I has 2 red and 3 blue balls; Urn II has 4 red and 1 blue. A fair die decides which urn is used: urn I if the die shows 1 or 2, urn II otherwise. One ball is drawn. Find P(red).</p></div>
+<p>Take B<sub>1</sub> = urn I (probability 2/6 = 1/3) and B<sub>2</sub> = urn II (probability 4/6 = 2/3). Then P(red) = (2/5)(1/3) + (4/5)(2/3) = 2/15 + 8/15 = 10/15 = 2/3.</p>
+<div class="callout note"><span class="clabel">Note</span> A frequent mistake is to forget that the weights are P(B<sub>i</sub>), not 1/n. The conditional probabilities alone do not determine the answer; the mixing proportions matter just as much, and this is exactly what makes Bayes’ theorem surprising.</div>
+<h2 class="sec-head" id="s9">1.9  Bayes’ Theorem</h2>
+<p>Total probability runs forward: given the case, predict the observation. Bayes’ theorem runs backward: given the observation, infer the case. It is the single most important formula in applied probability, and the foundation of statistical inference.</p>
+<div class="callout thm"><span class="clabel">Theorem 1.7 (Bayes’ theorem).</span> Let B<sub>1</sub>, …, B<sub>n</sub> be a partition of Ω with P(B<sub>i</sub>) &gt; 0, and let A be an event with P(A) &gt; 0. Then for each j,  P(B<sub>j</sub> | A) = P(A | B<sub>j</sub>) P(B<sub>j</sub>) / Σ<sub>i=1</sub><sup>n</sup> P(A | B<sub>i</sub>) P(B<sub>i</sub>).</div>
+<div class="proof"><span class="plabel">Proof.</span> By definition, P(B<sub>j</sub> | A) = P(A ∩ B<sub>j</sub>)/P(A). Write the numerator as P(A | B<sub>j</sub>)P(B<sub>j</sub>) using the multiplication rule, and the denominator as Σ<sub>i</sub> P(A | B<sub>i</sub>)P(B<sub>i</sub>) using the theorem of total probability. This is the whole proof — Bayes’ theorem is not deep, but it is powerful.</div>
+<p>The three ingredients have standard names, and using them makes the formula memorable:</p>
+<ul class="bullets"><li><strong>Prior</strong> P(B<sub>j</sub>) — what we believed about the case before seeing data.</li>
+<li><strong>Likelihood</strong> P(A | B<sub>j</sub>) — how well each case explains the data.</li>
+<li><strong>Posterior</strong> P(B<sub>j</sub> | A) — the revised belief after seeing the data.</li>
+<li><strong>Evidence</strong> P(A) = Σ<sub>i</sub> P(A | B<sub>i</sub>)P(B<sub>i</sub>) — a normalising constant, the same for every j.</li>
+</ul><p>In <strong>odds form</strong>, for two hypotheses B and B<sup>c</sup>, the posterior odds equal the prior odds multiplied by the likelihood ratio:</p>
+<div class="eq">P(B | A) / P(B<sup>c</sup> | A) = [P(B)/P(B<sup>c</sup>)] × [P(A | B)/P(A | B<sup>c</sup>)].</div>
+<p>This form is often the fastest way to compute, because the evidence cancels and one never needs to normalise.</p>
+<div class="example"><span class="exlabel">Example 1.20 (The medical test, and the base-rate fallacy).</span><p>A disease affects 1 in 1000 people. A test detects it with probability 0.99 if the person has it, and gives a false positive with probability 0.02 if not. A randomly chosen person tests positive. What is the probability they have the disease?</p></div>
+<p>Let D be "has the disease" and T<sup>+</sup> the positive test. The prior is P(D) = 0.001, the likelihoods are P(T<sup>+</sup> | D) = 0.99 and P(T<sup>+</sup> | D<sup>c</sup>) = 0.02. The evidence is P(T<sup>+</sup>) = (0.99)(0.001) + (0.02)(0.999) = 0.00099 + 0.01998 = 0.02097. Therefore</p>
+<div class="eq">P(D | T<sup>+</sup>) = 0.00099 / 0.02097 ≈ 0.0472.</div>
+<p>Despite a test that is 99% sensitive, a positive result implies only about a 4.7% chance of disease. The reason is arithmetic, not medicine: the healthy are 999 times more numerous, so their 2% false-positive rate produces far more positives than the diseased group produces true positives. This is the <strong>base-rate fallacy</strong>, and it is the reason screening programmes for rare conditions are controversial. Note also the check via odds form: prior odds 1:999, likelihood ratio 0.99/0.02 = 49.5, posterior odds ≈ 49.5:999, i.e. probability ≈ 0.047.</p>
+<div class="example"><span class="exlabel">Example 1.21 (Continuing Example 1.18).</span><p>A defective bulb is found. What is the probability it came from Factory 1?</p></div>
+<p>P(B<sub>1</sub> | D) = P(D | B<sub>1</sub>)P(B<sub>1</sub>) / P(D) = (0.02)(0.60)/0.032 = 0.012/0.032 = 0.375. So although Factory 1 supplies 60% of the stock, it accounts for only 37.5% of the defects — it is the better of the two factories, and Bayes’ theorem quantifies exactly how much better.</p>
+<div class="example"><span class="exlabel">Example 1.22 (Monty Hall).</span><p>A prize is behind one of three doors. The contestant picks door 1. The host, who knows where the prize is, opens a different door showing no prize, and offers a switch. Should the contestant switch?</p></div>
+<p>Let C<sub>i</sub> be the event that the prize is behind door i, so P(C<sub>i</sub>) = 1/3, and let H be the event that the host opens door 2. If the prize is behind door 1, the host may open either of doors 2 and 3, so P(H | C<sub>1</sub>) = 1/2. If the prize is behind door 2, the host cannot open door 2, so P(H | C<sub>2</sub>) = 0. If the prize is behind door 3, the host is forced to open door 2, so P(H | C<sub>3</sub>) = 1. Then</p>
+<div class="eq">P(H) = (1/2)(1/3) + 0 + (1)(1/3) = 1/2,   P(C<sub>3</sub> | H) = (1)(1/3)/(1/2) = 2/3.</div>
+<p>Switching wins with probability 2/3, staying with 1/3. The intuition is that the host’s action is informative precisely because it is constrained: he can never open the prize door, so his choice channels information about where the prize is not.</p>
+<div class="example"><span class="exlabel">Example 1.23 (Two-headed coin).</span><p>A bag holds 100 coins, one of which is two-headed; the rest are fair. A coin is drawn at random and tossed 5 times, showing heads every time. Find the probability that it is the two-headed coin.</p></div>
+<p>Let B<sub>1</sub> = two-headed, B<sub>2</sub> = fair. Priors 1/100 and 99/100. Likelihoods P(H<sup>5</sup> | B<sub>1</sub>) = 1 and P(H<sup>5</sup> | B<sub>2</sub>) = (1/2)<sup>5</sup> = 1/32. Then</p>
+<div class="eq">P(B<sub>1</sub> | H<sup>5</sup>) = (1)(1/100) / [(1)(1/100) + (1/32)(99/100)] = 0.01 / (0.01 + 0.030938) ≈ 0.2443.</div>
+<p>Five heads raises the probability from 1% to about 24%. Ten heads would raise it to about 0.911 — repeated independent evidence compounds multiplicatively through the likelihood ratio, which here is 32 per toss.</p>
+<h2 class="sec-head" id="s10">1.10  Worked Examples</h2>
+<p>The examples below combine several of the ideas above; they are of the standard and difficulty of examination questions.</p>
+<div class="example"><span class="exlabel">Example 1.24</span><p>A box contains 5 white and 4 black balls. Three balls are drawn at random without replacement. Find the probability that (a) all three are white, (b) exactly two are white, (c) at least one is white.</p></div>
+<p>The total number of unordered selections is C(9, 3) = 84. (a) C(5, 3)/84 = 10/84 = 5/42. (b) Choose 2 of the 5 white and 1 of the 4 black: C(5, 2)C(4, 1) = 10 × 4 = 40, so P = 40/84 = 10/21. (c) By the complement rule, P(at least one white) = 1 − P(all black) = 1 − C(4, 3)/84 = 1 − 4/84 = 20/21. A check: the three probabilities P(3 white) = 5/42, P(2 white) = 10/21, P(1 white) = C(5,1)C(4,2)/84 = 30/84 = 5/14, P(0 white) = 1/21 sum to 5/42 + 20/42 + 15/42 + 2/42 = 42/42.</p>
+<div class="example"><span class="exlabel">Example 1.25</span><p>Suppose P(A) = 0.3, P(B) = 0.4, and P(A ∪ B) = 0.6. Are A and B independent? Find P(A | B) and P(B | A).</p></div>
+<p>P(A ∩ B) = 0.3 + 0.4 − 0.6 = 0.1. Since P(A)P(B) = 0.12 ≠ 0.1, the events are <strong>not</strong> independent — they are slightly negatively dependent, since knowing B occurred reduces the chance of A from 0.3 to 0.25. Then P(A | B) = 0.1/0.4 = 0.25 and P(B | A) = 0.1/0.3 = 1/3.</p>
+<div class="example"><span class="exlabel">Example 1.26</span><p>A and B play a series of independent games, each won by A with probability 2/3. The first to win 3 games wins the series. Find the probability that A wins the series.</p></div>
+<p>A wins by a score of 3–0, 3–1 or 3–2. For 3–0 the probability is (2/3)<sup>3</sup> = 8/27. For 3–1, the last game must be won by A and exactly 2 of the first 3: C(3, 2)(2/3)<sup>2</sup>(1/3) × (2/3) = 3 × (4/9)(1/3)(2/3) = 24/81 = 8/27. For 3–2, A wins the last game and exactly 2 of the first 4: C(4, 2)(2/3)<sup>2</sup>(1/3)<sup>2</sup> × (2/3) = 6 × (4/9)(1/9)(2/3) = 48/243 = 16/81. Total: 8/27 + 8/27 + 16/81 = 24/81 + 24/81 + 16/81 = 64/81 ≈ 0.790. The "last game must be won" device is essential — it prevents double counting of the same sequence.</p>
+<div class="example"><span class="exlabel">Example 1.27</span><p>An electrical system has two subsystems in parallel, each containing two components in series. All four components work independently with probability p. Find the system reliability, and the value of p for reliability 0.99.</p></div>
+<p>A series pair works with probability p<sup>2</sup>. The two pairs are in parallel, so the system works if at least one pair works: R = 1 − (1 − p<sup>2</sup>)<sup>2</sup> = 2p<sup>2</sup> − p<sup>4</sup>. Setting R = 0.99 gives p<sup>4</sup> − 2p<sup>2</sup> + 0.99 = 0. Let u = p<sup>2</sup>: u<sup>2</sup> − 2u + 0.99 = 0, so u = [2 ± √(4 − 3.96)]/2 = [2 ± 0.2]/2, giving u = 0.9 or 1.1. Since u ≤ 1, p<sup>2</sup> = 0.9 and p = √0.9 ≈ 0.9487.</p>
+<div class="example"><span class="exlabel">Example 1.28</span><p>A fair coin is tossed repeatedly. Find the probability that the pattern HT appears before the pattern HH.</p></div>
+<p>Let p be the probability that HT occurs first, starting from a fresh state. After the first toss: if it is T (probability 1/2) we are back to the start, contributing (1/2)p. If it is H (probability 1/2), then the next toss decides in one step if it is T (HT wins) and returns to a state with a leading H if it is H (HH wins immediately). Careful reasoning from the state "last toss was H": let q be the probability HT appears before HH given the last toss was H. Then q = (1/2)(1) + (1/2)(0) = 1/2. Starting fresh, p = (1/2)p + (1/2)q = (1/2)p + 1/4, so p = 1/2. By symmetry the answer is 1/2, but the state argument shows why: from a leading H the very next toss settles it. Contrast the pattern HH versus TH, which is not symmetric — the general theory of pattern waiting times belongs to Markov chains.</p>
+<h2 class="sec-head" id="s11">1.11  Practice Problems with Solutions</h2>
+<p>Attempt these with the notes closed. Solutions follow each problem.</p>
+<div class="num-item"><span class="num">1.</span><div><strong>Problem.</strong> Let A, B, C be events with P(A) = 0.5, P(B) = 0.4, P(C) = 0.3, P(A ∩ B) = 0.2, P(A ∩ C) = 0.15, P(B ∩ C) = 0.1, P(A ∩ B ∩ C) = 0.05. Find P(A ∪ B ∪ C) and the probability that exactly one of the three occurs.</div></div>
+<p><strong>Solution.</strong> By inclusion–exclusion, P(A ∪ B ∪ C) = 1.2 − 0.45 + 0.05 = 0.80. For exactly one: P(A only) = P(A) − P(AB) − P(AC) + P(ABC) = 0.5 − 0.2 − 0.15 + 0.05 = 0.20; similarly P(B only) = 0.4 − 0.2 − 0.1 + 0.05 = 0.15 and P(C only) = 0.3 − 0.15 − 0.1 + 0.05 = 0.10. Total 0.45.</p>
+<div class="num-item"><span class="num">2.</span><div><strong>Problem.</strong> How many 4-digit numbers can be formed from the digits 1–7 with no repetition, such that the number is even?</div></div>
+<p><strong>Solution.</strong> The last digit must be even: 2, 4 or 6, giving 3 choices. The remaining three positions are filled from the other 6 digits in <sup>6</sup>P<sub>3</sub> = 6 × 5 × 4 = 120 ways. Total 3 × 120 = 360.</p>
+<div class="num-item"><span class="num">3.</span><div><strong>Problem.</strong> A committee of 4 is chosen from 6 men and 5 women. Find the probability that it contains exactly 2 women.</div></div>
+<p><strong>Solution.</strong> Total C(11, 4) = 330. Favourable C(5, 2)C(6, 2) = 10 × 15 = 150. So P = 150/330 = 5/11.</p>
+<div class="num-item"><span class="num">4.</span><div><strong>Problem.</strong> A die is rolled until a 6 appears. Find the probability that the first 6 occurs on an even-numbered roll.</div></div>
+<p><strong>Solution.</strong> Let p = 1/6 be the success probability and q = 5/6. P(even roll) = qp + q<sup>3</sup>p + q<sup>5</sup>p + ⋯ = qp/(1 − q<sup>2</sup>) = (5/6)(1/6)/[1 − 25/36] = (5/36)/(11/36) = 5/11.</p>
+<div class="num-item"><span class="num">5.</span><div><strong>Problem.</strong> Urn A has 3 red and 7 blue balls; urn B has 6 red and 4 blue. An urn is chosen by a fair coin, a ball is drawn and found to be red. What is the probability urn B was chosen?</div></div>
+<p><strong>Solution.</strong> Priors 1/2 each. P(red) = (1/2)(0.3) + (1/2)(0.6) = 0.45. Then P(B | red) = 0.3/0.45 = 2/3.</p>
+<div class="num-item"><span class="num">6.</span><div><strong>Problem.</strong> Show that if P(A) = 1 then P(A ∩ B) = P(B) for every event B.</div></div>
+<p><strong>Solution.</strong> P(B) = P(A ∩ B) + P(A<sup>c</sup> ∩ B) by total probability on the partition {A, A<sup>c</sup>}. But P(A<sup>c</sup>) = 0 and A<sup>c</sup> ∩ B ⊆ A<sup>c</sup>, so by monotonicity P(A<sup>c</sup> ∩ B) = 0. Hence P(B) = P(A ∩ B). Interpreted conditionally: an event of probability 1 carries no information.</p>
+<div class="num-item"><span class="num">7.</span><div><strong>Problem.</strong> A bag contains 3 red, 4 white and 5 blue balls. Three are drawn without replacement. Find the probability that they are all of different colours.</div></div>
+<p><strong>Solution.</strong> Total C(12, 3) = 220. Favourable 3 × 4 × 5 = 60. So P = 60/220 = 3/11.</p>
+<div class="num-item"><span class="num">8.</span><div><strong>Problem.</strong> Let A and B be independent with P(A ∪ B) = 0.8 and P(A) = 0.5. Find P(B).</div></div>
+<p><strong>Solution.</strong> Write 0.8 = 0.5 + P(B) − 0.5 P(B), so 0.3 = 0.5 P(B), giving P(B) = 0.6.</p>
+<div class="num-item"><span class="num">9.</span><div><strong>Problem.</strong> n people are seated at random around a round table. Find the probability that two particular people sit next to each other.</div></div>
+<p><strong>Solution.</strong> Fix one of the two; there are (n − 1)! circular arrangements total, and the second person sits adjacent in 2 × (n − 2)! of them. So P = 2(n−2)!/(n−1)! = 2/(n − 1).</p>
+<div class="num-item"><span class="num">10.</span><div><strong>Problem.</strong> A factory has three machines producing 50%, 30% and 20% of output, with defect rates 3%, 4% and 5%. A defective item is found. Which machine most likely produced it?</div></div>
+<p><strong>Solution.</strong> P(D) = 0.5(0.03) + 0.3(0.04) + 0.2(0.05) = 0.015 + 0.012 + 0.010 = 0.037. Posteriors: 0.015/0.037 ≈ 0.405, 0.012/0.037 ≈ 0.324, 0.010/0.037 ≈ 0.270. Machine 1 is the most likely culprit, with about 40.5%, even though it has the lowest defect rate — volume dominates.</p>
+<div class="num-item"><span class="num">11.</span><div><strong>Problem.</strong> Prove that if A<sub>1</sub>, …, A<sub>n</sub> are mutually independent then P(⋂<sub>i</sub> A<sub>i</sub>) = ∏<sub>i</sub> P(A<sub>i</sub>) and P(⋃<sub>i</sub> A<sub>i</sub>) = 1 − ∏<sub>i</sub>(1 − P(A<sub>i</sub>)).</div></div>
+<p><strong>Solution.</strong> The first is the definition applied to the full set of indices. For the second, P(⋃ A<sub>i</sub>) = 1 − P(⋂ A<sub>i</sub><sup>c</sup>), and the complements are mutually independent by Proposition 1.5 applied repeatedly, so P(⋂ A<sub>i</sub><sup>c</sup>) = ∏ P(A<sub>i</sub><sup>c</sup>) = ∏ (1 − P(A<sub>i</sub>)). This is the "at least one" formula, and it is the workhorse of reliability calculations.</p>
+<div class="num-item"><span class="num">12.</span><div><strong>Problem.</strong> A coin with P(H) = p is tossed n times independently. Show that the probability of an even number of heads is [1 + (1 − 2p)<sup>n</sup>]/2.</div></div>
+<p><strong>Solution.</strong> Let E<sub>n</sub> be the probability of an even count after n tosses. Then E<sub>n</sub> = E<sub>n−1</sub>(1 − p) + (1 − E<sub>n−1</sub>)p = p + (1 − 2p)E<sub>n−1</sub>, with E<sub>0</sub> = 1. Solving the linear recursion gives E<sub>n</sub> = 1/2 + (1 − 2p)<sup>n</sup>/2. Check p = 1/2: E<sub>n</sub> = 1/2 as symmetry demands; p = 1: E<sub>n</sub> = [1 + (−1)<sup>n</sup>]/2, which is 1 for even n and 0 for odd n, as it must be.</p>
+<h2 class="sec-head" id="s12">1.12  Formula Summary — Module 1</h2>
+<div class="table-wrap"><table><thead><tr><th>Result</th><th>Statement</th></tr></thead><tbody>
+<tr><td>Axioms</td><td>P(A) ≥ 0;  P(Ω) = 1;  disjoint ⇒ P(⋃ A<sub>n</sub>) = Σ P(A<sub>n</sub>)</td></tr>
+<tr><td>Complement</td><td>P(A<sup>c</sup>) = 1 − P(A)</td></tr>
+<tr><td>Monotonicity</td><td>A ⊆ B ⇒ P(A) ≤ P(B)</td></tr>
+<tr><td>Two events</td><td>P(A ∪ B) = P(A) + P(B) − P(A ∩ B)</td></tr>
+<tr><td>Three events</td><td>P(A∪B∪C) = ΣP − ΣP(pairs) + P(triple)</td></tr>
+<tr><td>Boole</td><td>P(⋃ A<sub>n</sub>) ≤ Σ P(A<sub>n</sub>)</td></tr>
+<tr><td>Continuity</td><td>A<sub>n</sub> ↑ A ⇒ P(A<sub>n</sub>) ↑ P(A);  A<sub>n</sub> ↓ A ⇒ P(A<sub>n</sub>) ↓ P(A)</td></tr>
+<tr><td>Permutations</td><td><sup>n</sup>P<sub>r</sub> = n!/(n−r)!;  with repetition n<sup>r</sup>;  circular (n−1)!</td></tr>
+<tr><td>Combinations</td><td>C(n,r) = n!/[r!(n−r)!];  with repetition C(n+r−1, r)</td></tr>
+<tr><td>Multinomial</td><td>n!/(n<sub>1</sub>! ⋯ n<sub>k</sub>!)</td></tr>
+<tr><td>Conditional</td><td>P(A|B) = P(A∩B)/P(B),  P(B) &gt; 0</td></tr>
+<tr><td>Multiplication</td><td>P(A∩B) = P(A)P(B|A)</td></tr>
+<tr><td>Independence</td><td>P(A∩B) = P(A)P(B)</td></tr>
+<tr><td>Total probability</td><td>P(A) = Σ<sub>i</sub> P(A|B<sub>i</sub>)P(B<sub>i</sub>)</td></tr>
+<tr><td>Bayes</td><td>P(B<sub>j</sub>|A) = P(A|B<sub>j</sub>)P(B<sub>j</sub>) / Σ<sub>i</sub> P(A|B<sub>i</sub>)P(B<sub>i</sub>)</td></tr>
+<tr><td>Bayes (odds)</td><td>posterior odds = prior odds × likelihood ratio</td></tr>
+</tbody></table></div>
+</section>
+<section class="module">
+  <div class="module-band">
+    <span class="module-kicker">Module 2</span>
+    <h1 class="module-title">Random Variables</h1>
+  </div>
+<p>Module 1 built the model of a single experiment. To do anything quantitative with that model — to average, to compare, to take limits — we need numbers attached to outcomes. A random variable is exactly that attachment, and once we have it we can forget about the underlying sample space and work entirely with distributions on the real line. This module develops the three equivalent descriptions of a one-dimensional random variable (the pmf or pdf, the cdf, and the moments), and then the calculus of changing variables.</p>
+<h2 class="sec-head" id="s13">2.1  Random Variables: Definition and Interpretation</h2>
+<div class="callout def"><span class="clabel">Definition 2.1 (Random variable).</span> Given a probability space (Ω, 𝓕, P), a <strong>random variable</strong> is a function X : Ω → ℝ such that for every Borel set B ⊆ ℝ, the set { ω ∈ Ω : X(ω) ∈ B } belongs to 𝓕. This condition is called <strong>measurability</strong>; when it holds we may speak of the probability of the event {X ∈ B}, and we write P(X ∈ B) for P({ ω : X(ω) ∈ B }).</div>
+<p>Measurability is what allows us to assign probabilities to statements about X. In this course it is never a practical obstruction: any function you can write down with ordinary arithmetic, exponentials, logs, maxima and limits is measurable, provided it is finite almost surely. The condition can be checked on a generating class, which gives the convenient criterion: X is a random variable if and only if {X ≤ x} ∈ 𝓕 for every real x.</p>
+<div class="callout note"><span class="clabel">Note</span> A random variable is neither random nor a variable. It is a deterministic function of the outcome. The randomness lives entirely in ω; once ω is realised, X(ω) is a fixed number. What is random is which value we will see — that is, the induced probability distribution.</div>
+<div class="callout def"><span class="clabel">Definition 2.2 (Distribution of a random variable).</span> The <strong>distribution</strong> (or law) of X is the probability measure P<sub>X</sub> on (ℝ, 𝒱) defined by P<sub>X</sub>(B) = P(X ∈ B). Two random variables with the same distribution are called <strong>identically distributed</strong>, written X =<sub>d</sub> Y. Identically distributed variables need not be equal, and need not even be defined on the same probability space.</div>
+<div class="example"><span class="exlabel">Example 2.1</span><p>Toss two fair coins and let X be the number of heads. Exhibit X as a function on Ω and compute its distribution.</p></div>
+<p>With Ω = {HH, HT, TH, TT} and equal probabilities 1/4, define X(HH) = 2, X(HT) = X(TH) = 1, X(TT) = 0. Then P<sub>X</sub>({0}) = 1/4, P<sub>X</sub>({1}) = 1/2, P<sub>X</sub>({2}) = 1/4. The function X is fixed; the distribution is what carries the randomness.</p>
+<div class="callout def"><span class="clabel">Definition 2.3 (Indicator random variable).</span> For an event A, the <strong>indicator</strong> 1<sub>A</sub> is the random variable equal to 1 on A and 0 on A<sup>c</sup>. Its distribution is Bernoulli with parameter p = P(A). Indicators are the atoms from which more complicated random variables are built, and the identity P(A) = E[1<sub>A</sub>] turns every probability into an expectation.</div>
+<h2 class="sec-head" id="s14">2.2  Types of Random Variables</h2>
+<p>Random variables are classified by the nature of their distribution, and the classification determines which computational tools apply.</p>
+<div class="callout def"><span class="clabel">Definition 2.4 (Discrete random variable).</span> X is <strong>discrete</strong> if its range is finite or countably infinite, i.e. there is a countable set S ⊆ ℝ with P(X ∈ S) = 1.</div>
+<div class="callout def"><span class="clabel">Definition 2.5 (Continuous / absolutely continuous random variable).</span> X is <strong>(absolutely) continuous</strong> if there exists a non-negative function f such that P(X ≤ x) = ∫<sub>−∞</sub><sup>x</sup> f(t) dt for every x ∈ ℝ. The function f is the <strong>probability density function</strong>.</div>
+<div class="callout def"><span class="clabel">Definition 2.6 (Mixed and singular random variables).</span> X is <strong>mixed</strong> if it is a convex combination of a discrete and a continuous part — for example, a rainfall amount that is exactly zero with probability 0.3 and otherwise exponentially distributed. X is <strong>singular</strong> (or continuous but not absolutely continuous) if its distribution is continuous — no atoms — but is not given by a density; the standard example is the Cantor distribution.</div>
+<p>Lebesgue’s decomposition theorem guarantees that <strong>every</strong> distribution splits uniquely into a discrete part, an absolutely continuous part and a singular part. So the three cases above are exhaustive, and in applied work the singular part is almost always absent.</p>
+<div class="callout warn"><span class="clabel">Caution</span> The word "continuous" is used in two different senses and you must keep them apart. A random variable is <strong>continuous</strong> in the distributional sense when P(X = x) = 0 for every x; it is <strong>absolutely continuous</strong> when it has a density. Every absolutely continuous variable is continuous, but not conversely — the Cantor variable is continuous and has no density. Examiners use "continuous" for the second meaning, and for this course the two coincide.</div>
+<div class="table-wrap"><table><thead><tr><th>Type</th><th>Range</th><th>Described by</th><th>P(X = x)</th></tr></thead><tbody>
+<tr><td>Discrete</td><td>Countable</td><td>Probability mass function</td><td>p(x), possibly positive</td></tr>
+<tr><td>Absolutely continuous</td><td>Uncountable interval</td><td>Probability density function</td><td>0 for every x</td></tr>
+<tr><td>Mixed</td><td>Both</td><td>A pmf plus a density</td><td>Positive at some x</td></tr>
+<tr><td>Singular</td><td>Uncountable</td><td>Continuous cdf with no density</td><td>0 for every x</td></tr>
+</tbody></table></div>
+<h2 class="sec-head" id="s15">2.3  Probability Mass Functions</h2>
+<div class="callout def"><span class="clabel">Definition 2.7 (Probability mass function).</span> For a discrete random variable X with range S, the <strong>probability mass function</strong> (pmf) is p<sub>X</sub>(x) = P(X = x), defined for x ∈ S and taken to be 0 elsewhere.</div>
+<div class="callout prop"><span class="clabel">Proposition 2.1 (Properties of a pmf).</span> A function p : ℝ → [0, 1] is the pmf of some discrete random variable if and only if (a) p(x) ≥ 0 for all x, and (b) Σ<sub>x</sub> p(x) = 1, the sum being over the (countable) support. Moreover, for any set A, P(X ∈ A) = Σ<sub>x ∈ A</sub> p(x).</div>
+<div class="proof"><span class="plabel">Proof.</span> Necessity: p(x) is a probability, so non-negative; the events {X = x} over the support are disjoint with union Ω, so their probabilities sum to 1 by countable additivity. Sufficiency: given such a p, put Ω = S, 𝓕 = 2<sup>S</sup>, P({x}) = p(x), and X(x) = x. The final display is again countable additivity over the disjoint events {X = x} for x ∈ A.</div>
+<h3>2.3.1  The standard discrete distributions</h3>
+<p>The following families recur constantly. For each, memorise the pmf, the support, and the mean and variance.</p>
+<div class="table-wrap"><table><thead><tr><th>Distribution</th><th>Notation</th><th>pmf  p(x)</th><th>Support</th><th>Mean</th><th>Variance</th></tr></thead><tbody>
+<tr><td>Bernoulli</td><td>Bern(p)</td><td>p<sup>x</sup>(1−p)<sup>1−x</sup></td><td>x = 0, 1</td><td>p</td><td>p(1−p)</td></tr>
+<tr><td>Binomial</td><td>Bin(n, p)</td><td>C(n, x) p<sup>x</sup>(1−p)<sup>n−x</sup></td><td>x = 0, …, n</td><td>np</td><td>np(1−p)</td></tr>
+<tr><td>Geometric</td><td>Geom(p)</td><td>(1−p)<sup>x−1</sup> p</td><td>x = 1, 2, …</td><td>1/p</td><td>(1−p)/p<sup>2</sup></td></tr>
+<tr><td>Negative binomial</td><td>NB(r, p)</td><td>C(x−1, r−1) p<sup>r</sup>(1−p)<sup>x−r</sup></td><td>x = r, r+1, …</td><td>r/p</td><td>r(1−p)/p<sup>2</sup></td></tr>
+<tr><td>Poisson</td><td>Pois(λ)</td><td>e<sup>−λ</sup> λ<sup>x</sup> / x!</td><td>x = 0, 1, 2, …</td><td>λ</td><td>λ</td></tr>
+<tr><td>Discrete uniform</td><td>DU(n)</td><td>1/n</td><td>x = 1, …, n</td><td>(n+1)/2</td><td>(n<sup>2</sup>−1)/12</td></tr>
+<tr><td>Hypergeometric</td><td>Hyp(N, K, n)</td><td>C(K,x) C(N−K, n−x) / C(N, n)</td><td>max(0, n−N+K) ≤ x ≤ min(n, K)</td><td>nK/N</td><td>n(K/N)(1−K/N)(N−n)/(N−1)</td></tr>
+</tbody></table></div>
+<div class="example"><span class="exlabel">Example 2.2 (Binomial — the sampling model).</span><p>A machine produces defective items independently with probability 0.05. In a sample of 20, find the probability of at most 1 defective, and the expected number.</p></div>
+<p>Let X be the number defective; X ~ Bin(20, 0.05). Then P(X = 0) = 0.95<sup>20</sup> = 0.3585 and P(X = 1) = 20(0.05)(0.95)<sup>19</sup> = 0.3774, so P(X ≤ 1) = 0.7359. The mean is np = 1 and the variance np(1−p) = 0.95, so the standard deviation is about 0.975 — in this case the distribution is far from symmetric, so the mean and sd should not be read as a normal approximation.</p>
+<div class="example"><span class="exlabel">Example 2.3 (Poisson as a limit of the binomial).</span><p>Show that Bin(n, p) with np → λ and n → ∞ converges to Pois(λ).</p></div>
+<p>Write the binomial pmf with p = λ/n and fix x: C(n, x)(λ/n)<sup>x</sup>(1 − λ/n)<sup>n−x</sup> = [n(n−1)⋯(n−x+1)/n<sup>x</sup>] · (λ<sup>x</sup>/x!) · (1 − λ/n)<sup>n−x</sup>. The first factor tends to 1 (it is x factors each tending to 1), the third tends to e<sup>−λ</sup> because (1 − λ/n)<sup>n</sup> → e<sup>−λ</sup> and (1 − λ/n)<sup>−x</sup> → 1. The limit is e<sup>−λ</sup>λ<sup>x</sup>/x!. This is why the Poisson is called the law of rare events, and why binomial counts with large n and small p are computed with it: with n = 1000, p = 0.002, Bin(1000, 0.002) is very close to Pois(2).</p>
+<div class="example"><span class="exlabel">Example 2.4 (The memoryless property of the geometric).</span><p>Show that for X ~ Geom(p) and integers m, n ≥ 1,  P(X &gt; m + n | X &gt; m) = P(X &gt; n).</p></div>
+<p>Recall P(X &gt; k) = (1 − p)<sup>k</sup> for integer k ≥ 0, since the first k trials must all fail. Then P(X &gt; m + n | X &gt; m) = P(X &gt; m + n)/P(X &gt; m) = (1−p)<sup>m+n</sup>/(1−p)<sup>m</sup> = (1−p)<sup>n</sup> = P(X &gt; n). The distribution forgets how long it has already waited — the discrete analogue of the exponential memoryless property. No other distribution on the positive integers has this property.</p>
+<h2 class="sec-head" id="s16">2.4  Probability Density Functions</h2>
+<div class="callout def"><span class="clabel">Definition 2.8 (Probability density function).</span> A random variable X is absolutely continuous with <strong>probability density function</strong> f if f(x) ≥ 0 for all x, ∫<sub>−∞</sub><sup>∞</sup> f(x) dx = 1, and for every interval (a, b],  P(a &lt; X ≤ b) = ∫<sub>a</sub><sup>b</sup> f(x) dx.  Equivalently P(X ∈ A) = ∫<sub>A</sub> f(x) dx for every Borel set A.</div>
+<div class="callout warn"><span class="clabel">Caution</span> f(x) is <strong>not</strong> a probability. It is a density, and it may exceed 1: the uniform density on (0, 0.5) equals 2. Only integrals of f have probabilistic meaning. The analogy is with physical density — a point of a rod has no mass, but mass per unit length can be large.</div>
+<div class="callout prop"><span class="clabel">Proposition 2.2 (Consequences of having a density).</span> If X has density f, then: (a) P(X = x) = 0 for every x; (b) P(a ≤ X ≤ b) = P(a &lt; X &lt; b) = ∫<sub>a</sub><sup>b</sup> f, so endpoints do not matter; (c) P(a &lt; X ≤ b) = F(b) − F(a) where F is the cdf; (d) if f is continuous at x then F′(x) = f(x).</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) P(X = x) = lim<sub>h↓0</sub> ∫<sub>x</sub><sup>x+h</sup> f = 0 by continuity of the integral. (b) Adding or removing finitely many points changes the integral by zero. (c) Both sides equal the integral of f over (a, b]. (d) F(x) = ∫<sub>−∞</sub><sup>x</sup> f, so the fundamental theorem of calculus gives F′ = f wherever f is continuous.</div>
+<h3>2.4.1  The standard continuous distributions</h3>
+<div class="table-wrap"><table><thead><tr><th>Distribution</th><th>Notation</th><th>density  f(x)</th><th>Support</th><th>Mean</th><th>Variance</th></tr></thead><tbody>
+<tr><td>Uniform</td><td>U(a, b)</td><td>1/(b−a)</td><td>a &lt; x &lt; b</td><td>(a+b)/2</td><td>(b−a)<sup>2</sup>/12</td></tr>
+<tr><td>Exponential</td><td>Exp(λ)</td><td>λ e<sup>−λx</sup></td><td>x &gt; 0</td><td>1/λ</td><td>1/λ<sup>2</sup></td></tr>
+<tr><td>Normal</td><td>N(μ, σ<sup>2</sup>)</td><td>(1/(σ√(2π))) e<sup>−(x−μ)<sup>2</sup>/(2σ<sup>2</sup>)</sup></td><td>all x</td><td>μ</td><td>σ<sup>2</sup></td></tr>
+<tr><td>Gamma</td><td>Gamma(α, λ)</td><td>λ<sup>α</sup> x<sup>α−1</sup> e<sup>−λx</sup> / Γ(α)</td><td>x &gt; 0</td><td>α/λ</td><td>α/λ<sup>2</sup></td></tr>
+<tr><td>Beta</td><td>Beta(a, b)</td><td>x<sup>a−1</sup>(1−x)<sup>b−1</sup> / B(a, b)</td><td>0 &lt; x &lt; 1</td><td>a/(a+b)</td><td>ab/[(a+b)<sup>2</sup>(a+b+1)]</td></tr>
+<tr><td>Cauchy</td><td>Cauchy(θ)</td><td>1/[π(1 + (x−θ)<sup>2</sup>)]</td><td>all x</td><td>undefined</td><td>undefined</td></tr>
+<tr><td>Lognormal</td><td>LN(μ, σ<sup>2</sup>)</td><td>(1/(xσ√(2π))) e<sup>−(ln x − μ)<sup>2</sup>/(2σ<sup>2</sup>)</sup></td><td>x &gt; 0</td><td>e<sup>μ+σ<sup>2</sup>/2</sup></td><td>(e<sup>σ<sup>2</sup></sup> − 1) e<sup>2μ+σ<sup>2</sup></sup></td></tr>
+</tbody></table></div>
+<p>Two remarks on the table. First, the exponential is the Gamma with α = 1, and the sum of n independent Exp(λ) variables is Gamma(n, λ); this reappears in Module 3 under convolution. Second, the Cauchy has no mean: the integral ∫ |x| f(x) dx diverges, so E[X] does not exist, and neither does any higher moment. This is not a pathology to be waved away — the law of large numbers genuinely fails for the Cauchy distribution.</p>
+<div class="example"><span class="exlabel">Example 2.5 (The memoryless property of the exponential).</span><p>For X ~ Exp(λ) and s, t &gt; 0, show P(X &gt; s + t | X &gt; s) = P(X &gt; t).</p></div>
+<p>Since P(X &gt; u) = e<sup>−λu</sup>, we get P(X &gt; s + t | X &gt; s) = e<sup>−λ(s+t)</sup>/e<sup>−λs</sup> = e<sup>−λt</sup> = P(X &gt; t). The exponential is the <strong>only</strong> continuous distribution on (0, ∞) with this property. It is why exponential lifetimes are the standing assumption in reliability and in the theory of Markov chains — a Poisson process’ inter-arrival times must be exponential precisely because arrivals have no memory.</p>
+<div class="example"><span class="exlabel">Example 2.6 (The normal density integrates to 1).</span><p>Verify the normalisation constant of N(0, 1).</p></div>
+<p>Let I = ∫<sub>−∞</sub><sup>∞</sup> e<sup>−x<sup>2</sup>/2</sup> dx. Then I<sup>2</sup> = ∫∫ e<sup>−(x<sup>2</sup>+y<sup>2</sup>)/2</sup> dx dy. Switching to polar coordinates, x = r cos θ, y = r sin θ, dx dy = r dr dθ, gives I<sup>2</sup> = ∫<sub>0</sub><sup>2π</sup> ∫<sub>0</sub><sup>∞</sup> e<sup>−r<sup>2</sup>/2</sup> r dr dθ = 2π · [−e<sup>−r<sup>2</sup>/2</sup>]<sub>0</sub><sup>∞</sup> = 2π. Hence I = √(2π) and the density 1/√(2π) · e<sup>−x<sup>2</sup>/2</sup> integrates to 1. The general case follows by the substitution z = (x − μ)/σ.</p>
+<h2 class="sec-head" id="s17">2.5  The Cumulative Distribution Function</h2>
+<p>The cdf is the universal description: it exists for every random variable, discrete, continuous or mixed, and it is the object to which the general theory refers.</p>
+<div class="callout def"><span class="clabel">Definition 2.9 (Cumulative distribution function).</span> The <strong>cdf</strong> of a random variable X is the function F<sub>X</sub> : ℝ → [0, 1] given by  F<sub>X</sub>(x) = P(X ≤ x),  x ∈ ℝ.</div>
+<div class="callout thm"><span class="clabel">Theorem 2.3 (Properties of a cdf).</span> Every cdf F satisfies: (i) F is non-decreasing: x<sub>1</sub> &lt; x<sub>2</sub> ⇒ F(x<sub>1</sub>) ≤ F(x<sub>2</sub>); (ii) F is right-continuous: F(x<sup>+</sup>) = lim<sub>h↓0<sup>+</sup></sub> F(x + h) = F(x); (iii) F(−∞) := lim<sub>x→−∞</sub> F(x) = 0 and F(+∞) := lim<sub>x→∞</sub> F(x) = 1; (iv) 0 ≤ F(x) ≤ 1. Conversely, any function with properties (i)–(iii) is the cdf of some random variable.</div>
+<div class="proof"><span class="plabel">Proof.</span> (i) If x<sub>1</sub> &lt; x<sub>2</sub> then {X ≤ x<sub>1</sub>} ⊆ {X ≤ x<sub>2</sub>}, so monotonicity of P (Property P4 of Module 1) gives the inequality. (ii) Let h<sub>n</sub> ↓ 0. The events {X ≤ x + h<sub>n</sub>} decrease to {X ≤ x}, so by continuity from above F(x + h<sub>n</sub>) → F(x). (iii) As x ↓ −∞ the events {X ≤ x} decrease to ∅, so F → 0; as x ↑ ∞ they increase to Ω, so F → 1 by continuity from below. (iv) Immediate from monotonicity and the limits. The converse is a standard construction and is not needed here.</div>
+<div class="callout prop"><span class="clabel">Proposition 2.4 (Computing with the cdf).</span> For any random variable X and real a &lt; b: (a) P(a &lt; X ≤ b) = F(b) − F(a); (b) P(X &gt; a) = 1 − F(a); (c) P(X = a) = F(a) − F(a<sup>−</sup>), where F(a<sup>−</sup>) is the left limit; (d) X is continuous (no atoms) if and only if F is continuous everywhere.</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) {X ≤ b} is the disjoint union of {X ≤ a} and {a &lt; X ≤ b}, so additivity gives F(b) = F(a) + P(a &lt; X ≤ b). (b) Complement rule. (c) The events {a − 1/n &lt; X ≤ a} decrease to {X = a}; their probabilities are F(a) − F(a − 1/n), which tend to F(a) − F(a<sup>−</sup>). (d) Immediate from (c): atoms are exactly the jumps of F.</div>
+<p>The relationship between the three descriptions is worth stating explicitly, because moving between them is most of the computational work in this course:</p>
+<ul class="bullets"><li><strong>Discrete case.</strong> F is a step function, constant between the points of the support, jumping by p(x) at each x. Hence p(x) = F(x) − F(x<sup>−</sup>).</li>
+<li><strong>Continuous case.</strong> F(x) = ∫<sub>−∞</sub><sup>x</sup> f(t) dt, and f(x) = F′(x) at points where F is differentiable. F is continuous but generally not differentiable everywhere — at a kink, f is defined arbitrarily or not at all, which does not matter since single points carry no probability.</li>
+<li><strong>Mixed case.</strong> F is the convex combination of a step function and a continuous cdf; the jumps of F give the discrete part.</li>
+</ul><div class="example"><span class="exlabel">Example 2.7</span><p>Let X have cdf F(x) = 0 for x &lt; 0, F(x) = x<sup>2</sup> for 0 ≤ x &lt; 1, and F(x) = 1 for x ≥ 1. Find the density and P(0.3 &lt; X &lt; 0.7).</p></div>
+<p>F is continuous everywhere, so X has no atoms, and it is differentiable except at 0 and 1. Differentiating gives f(x) = 2x on (0, 1) and 0 elsewhere; this is non-negative and integrates to 1, so it is a valid density (it is the Beta(2, 1) density). Then P(0.3 &lt; X &lt; 0.7) = F(0.7) − F(0.3) = 0.49 − 0.09 = 0.40, which also equals ∫<sub>0.3</sub><sup>0.7</sup> 2x dx = 0.49 − 0.09.</p>
+<div class="callout def"><span class="clabel">Definition 2.10 (Quantile function).</span> For a cdf F, the <strong>quantile function</strong> is F<sup>−1</sup>(u) = inf{ x : F(x) ≥ u } for 0 &lt; u &lt; 1. If F is continuous and strictly increasing, F<sup>−1</sup> is the ordinary inverse.</div>
+<div class="callout thm"><span class="clabel">Theorem 2.5 (Inverse transform / probability integral transform).</span> If U ~ U(0, 1) and F is any cdf, then X = F<sup>−1</sup>(U) has cdf F. Conversely, if X has continuous cdf F then F(X) ~ U(0, 1).</div>
+<div class="proof"><span class="plabel">Proof.</span> For the first part, P(X ≤ x) = P(F<sup>−1</sup>(U) ≤ x) = P(U ≤ F(x)) = F(x), using that F<sup>−1</sup>(u) ≤ x exactly when u ≤ F(x) and that U is uniform on (0, 1). For the second, P(F(X) ≤ u) = P(X ≤ F<sup>−1</sup>(u)) = F(F<sup>−1</sup>(u)) = u.</div>
+<p>This theorem is the basis of <strong>simulation</strong>. A computer produces uniform variates; to obtain any other distribution you apply its quantile function. To generate Exp(λ), use X = −ln(U)/λ. To generate N(0, 1) one uses the Box–Muller transform, which is a two-dimensional change of variables — see Module 3.</p>
+<h2 class="sec-head" id="s18">2.6  Expectation, Moments and Variance</h2>
+<div class="callout def"><span class="clabel">Definition 2.11 (Expectation).</span> The <strong>expectation</strong> (mean, expected value) of a random variable X is  E[X] = Σ<sub>x</sub> x p<sub>X</sub>(x)  in the discrete case (the sum over the support), and  E[X] = ∫<sub>−∞</sub><sup>∞</sup> x f<sub>X</sub>(x) dx  in the continuous case. In both cases the expression is defined only if it converges <strong>absolutely</strong>; otherwise E[X] does not exist.</div>
+<p>Absolute convergence matters. For the Cauchy distribution, ∫ |x| f(x) dx = ∞ while the symmetric principal value of ∫ x f(x) dx is zero; declaring the mean to be 0 would break the linearity theorems and the law of large numbers. The correct statement is that the Cauchy mean is undefined.</p>
+<div class="callout thm"><span class="clabel">Theorem 2.6 (Law of the unconscious statistician, LOTUS).</span> For any (measurable) function g : ℝ → ℝ,  E[g(X)] = Σ<sub>x</sub> g(x) p<sub>X</sub>(x)  or  E[g(X)] = ∫<sub>−∞</sub><sup>∞</sup> g(x) f<sub>X</sub>(x) dx,  provided the sum or integral converges absolutely.</div>
+<div class="proof"><span class="plabel">Proof.</span> For discrete X, group the outcomes by the value of g: P(g(X) = y) = Σ<sub>x : g(x) = y</sub> p<sub>X</sub>(x). Then E[g(X)] = Σ<sub>y</sub> y P(g(X) = y) = Σ<sub>y</sub> Σ<sub>x : g(x) = y</sub> g(x) p<sub>X</sub>(x) = Σ<sub>x</sub> g(x) p<sub>X</sub>(x). The continuous case is proved by a change-of-variables argument, or by approximating g with step functions.</div>
+<p>LOTUS is what makes expectation computable. To find E[X<sup>2</sup>] you do <strong>not</strong> need the distribution of X<sup>2</sup>; you integrate x<sup>2</sup> against the density of X. The one thing you cannot avoid computing the distribution of is a <strong>maximum or minimum</strong>, because the function is not applied pointwise in a simple way — see Module 3.</p>
+<div class="callout prop"><span class="clabel">Proposition 2.7 (Properties of expectation).</span> Whenever the expectations exist: (a) E[c] = c for a constant c; (b) <strong>linearity</strong>: E[aX + b] = aE[X] + b, and more generally E[Σ a<sub>i</sub> X<sub>i</sub>] = Σ a<sub>i</sub> E[X<sub>i</sub>] for any random variables with finite means, <strong>with no independence assumption</strong>; (c) if X ≥ 0 then E[X] ≥ 0, and if X ≤ Y then E[X] ≤ E[Y]; (d) |E[X]| ≤ E[|X|].</div>
+<div class="proof"><span class="plabel">Proof.</span> All four follow by applying the corresponding facts about sums and integrals to the definition. Linearity of the integral is the key step, and it is exactly why expectation is so much easier to handle than variance or than probabilities of unions.</div>
+<div class="callout note"><span class="clabel">Note</span> Linearity of expectation is the most powerful tool in the subject precisely because it requires nothing — no independence, no identical distribution, no continuity. The technique of <strong>indicator variables</strong> exploits this: to count something complicated, write the count as a sum of 0–1 indicators and add their expectations. Example 2.9 below is the standard illustration.</div>
+<div class="callout def"><span class="clabel">Definition 2.12 (Moments).</span> The <strong>k-th raw moment</strong> is μ<sub>k</sub>′ = E[X<sup>k</sup>]; the <strong>k-th central moment</strong> is μ<sub>k</sub> = E[(X − μ)<sup>k</sup>] where μ = E[X]. The first raw moment is the mean. The second central moment is the <strong>variance</strong>:</div>
+<div class="eq">Var(X) = σ<sup>2</sup> = E[(X − μ)<sup>2</sup>] = E[X<sup>2</sup>] − (E[X])<sup>2</sup>.</div>
+<p>The variance measures spread about the mean, in squared units; its square root σ is the <strong>standard deviation</strong>, which is in the original units. The two forms of the definition are equivalent by expanding the square and using linearity: E[(X−μ)<sup>2</sup>] = E[X<sup>2</sup>] − 2μE[X] + μ<sup>2</sup> = E[X<sup>2</sup>] − μ<sup>2</sup>. The second form is almost always the faster one to compute.</p>
+<div class="callout prop"><span class="clabel">Proposition 2.8 (Properties of variance).</span> (a) Var(X) ≥ 0, with equality if and only if X is constant almost surely; (b) Var(c) = 0 and Var(aX + b) = a<sup>2</sup> Var(X); (c) Var(X) = E[X<sup>2</sup>] − (E[X])<sup>2</sup>; (d) in general Var(X + Y) = Var(X) + Var(Y) + 2Cov(X, Y), and if X and Y are independent then Var(X + Y) = Var(X) + Var(Y).</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) A squared quantity has non-negative expectation; zero expectation of a non-negative variable forces it to be zero almost surely. (b) E[(aX + b) − (aμ + b)]<sup>2</sup> = E[a<sup>2</sup>(X − μ)<sup>2</sup>] = a<sup>2</sup>Var(X). (c) Expansion as above. (d) Expand E[((X−μ<sub>X</sub>) + (Y−μ<sub>Y</sub>))<sup>2</sup>] and use linearity; the cross term is 2Cov(X, Y), which vanishes under independence because E[XY] = E[X]E[Y].</div>
+<div class="callout warn"><span class="clabel">Caution</span> Variance is <strong>not</strong> linear: Var(aX + b) = a<sup>2</sup>Var(X), not aVar(X) + b. The squared scaling factor is the source of most arithmetic slips in examination answers. Note also that Var(X + Y) = Var(X) + Var(Y) requires independence (or at least zero covariance), whereas E[X + Y] = E[X] + E[Y] requires nothing.</div>
+<div class="example"><span class="exlabel">Example 2.8</span><p>Find the mean and variance of X ~ Exp(λ) and of X ~ U(a, b).</p></div>
+<p>Exponential: E[X] = ∫<sub>0</sub><sup>∞</sup> x λ e<sup>−λx</sup> dx. Integrating by parts with u = x, dv = λ e<sup>−λx</sup> dx gives [−x e<sup>−λx</sup>]<sub>0</sub><sup>∞</sup> + ∫<sub>0</sub><sup>∞</sup> e<sup>−λx</sup> dx = 0 + 1/λ = 1/λ. Similarly E[X<sup>2</sup>] = 2/λ<sup>2</sup>, so Var(X) = 2/λ<sup>2</sup> − 1/λ<sup>2</sup> = 1/λ<sup>2</sup>. Uniform: E[X] = ∫<sub>a</sub><sup>b</sup> x/(b−a) dx = (a+b)/2 by symmetry, and E[X<sup>2</sup>] = (a<sup>2</sup> + ab + b<sup>2</sup>)/3, giving Var(X) = (b−a)<sup>2</sup>/12.</p>
+<div class="example"><span class="exlabel">Example 2.9 (Indicator variables — a counting argument).</span><p>n letters are placed randomly into n envelopes. Find the expected number of correctly placed letters.</p></div>
+<p>Let X be the number correct and, for each i, let I<sub>i</sub> be the indicator that letter i is correctly placed. Then X = Σ<sub>i</sub> I<sub>i</sub>, so by linearity E[X] = Σ<sub>i</sub> E[I<sub>i</sub>] = Σ<sub>i</sub> P(letter i correct) = n · (1/n) = 1. No independence is needed, and none holds. Compare Example 1.13: the probability that <strong>no</strong> letter is correct is about e<sup>−1</sup>, so the distribution of X is approximately Poisson with mean 1 — and its mean is exactly 1, as the indicator method shows in one line.</p>
+<div class="callout thm"><span class="clabel">Theorem 2.9 (Markov’s inequality).</span> If X ≥ 0 and a &gt; 0, then P(X ≥ a) ≤ E[X]/a.</div>
+<div class="proof"><span class="plabel">Proof.</span> On the event {X ≥ a} we have X ≥ a, and elsewhere X ≥ 0, so pointwise X ≥ a · 1<sub>X ≥ a</sub>. Taking expectations and using monotonicity, E[X] ≥ a P(X ≥ a), which rearranges to the result.</div>
+<div class="callout thm"><span class="clabel">Theorem 2.10 (Chebyshev’s inequality).</span> For any random variable with finite mean μ and finite variance σ<sup>2</sup>, and any k &gt; 0,  P(|X − μ| ≥ kσ) ≤ 1/k<sup>2</sup>,  equivalently  P(|X − μ| ≥ ε) ≤ σ<sup>2</sup>/ε<sup>2</sup>.</div>
+<div class="proof"><span class="plabel">Proof.</span> Apply Markov’s inequality to the non-negative variable (X − μ)<sup>2</sup> with threshold a = k<sup>2</sup>σ<sup>2</sup>: P((X−μ)<sup>2</sup> ≥ k<sup>2</sup>σ<sup>2</sup>) ≤ E[(X−μ)<sup>2</sup>]/(k<sup>2</sup>σ<sup>2</sup>) = σ<sup>2</sup>/(k<sup>2</sup>σ<sup>2</sup>) = 1/k<sup>2</sup>. The event in question is the same one, so the result follows.</div>
+<p>Chebyshev is loose but universal: with k = 2 it guarantees at least 75% of the mass within two standard deviations, whereas for the normal the true figure is about 95%. Its importance is theoretical — it is the key step in the weak law of large numbers.</p>
+<h2 class="sec-head" id="s19">2.7  Transformation of a Single Random Variable</h2>
+<p>Given X with a known distribution and a function g, what is the distribution of Y = g(X)? There are three techniques, and choosing the right one is most of the skill.</p>
+<h3>2.7.1  Discrete case — direct summation</h3>
+<p>If X is discrete then Y = g(X) is discrete, and its pmf is obtained by collecting all the x that map to the same y:</p>
+<div class="eq">p<sub>Y</sub>(y) = P(g(X) = y) = Σ<sub>x : g(x) = y</sub> p<sub>X</sub>(x).</div>
+<p>No calculus is involved. The only care needed is that several values of x may give the same y; each must be included.</p>
+<div class="example"><span class="exlabel">Example 2.10</span><p>Let X ~ Bin(3, 1/2) and Y = (X − 1)<sup>2</sup>. Find the pmf of Y.</p></div>
+<p>X takes 0, 1, 2, 3 with probabilities 1/8, 3/8, 3/8, 1/8. Then Y takes the values 1 (from X = 0 and X = 2) and 0 (from X = 1) and 4 (from X = 3). So p<sub>Y</sub>(0) = 3/8, p<sub>Y</sub>(1) = 1/8 + 3/8 = 1/2, p<sub>Y</sub>(4) = 1/8. The probabilities sum to 1, as they must.</p>
+<h3>2.7.2  Continuous case — the change-of-variable formula</h3>
+<div class="callout thm"><span class="clabel">Theorem 2.11 (Monotone transformation).</span> Let X have density f<sub>X</sub> on an interval where f<sub>X</sub> &gt; 0, and let g be strictly monotone and differentiable with inverse h = g<sup>−1</sup>. Then Y = g(X) has density</div>
+<div class="eq">f<sub>Y</sub>(y) = f<sub>X</sub>(h(y)) · |h′(y)| = f<sub>X</sub>(h(y)) · |dh/dy|,</div>
+<p>on the range of g, and f<sub>Y</sub>(y) = 0 outside it.</p>
+<div class="proof"><span class="plabel">Proof.</span> Suppose g is increasing, so h is increasing. Then F<sub>Y</sub>(y) = P(g(X) ≤ y) = P(X ≤ h(y)) = F<sub>X</sub>(h(y)). Differentiating with the chain rule gives f<sub>Y</sub>(y) = f<sub>X</sub>(h(y))h′(y), and h′ &gt; 0. If g is decreasing, the inequality flips: F<sub>Y</sub>(y) = P(X ≥ h(y)) = 1 − F<sub>X</sub>(h(y)), and differentiating gives −f<sub>X</sub>(h(y))h′(y) with h′ &lt; 0, i.e. f<sub>X</sub>(h(y))|h′(y)|. The absolute value handles both cases at once.</div>
+<div class="callout note"><span class="clabel">Note</span> The factor |h′(y)| is the one-dimensional Jacobian. It is not decoration: it is what preserves the total probability. If g stretches an interval by a factor of 3, the density must be divided by 3 so that the area remains 1. In Module 3 this becomes the determinant of the Jacobian matrix for transformations of vectors.</div>
+<div class="example"><span class="exlabel">Example 2.11 (Linear transformation).</span><p>Let X ~ N(μ, σ<sup>2</sup>) and Y = (X − μ)/σ. Find the density of Y.</p></div>
+<p>Here g(x) = (x−μ)/σ, h(y) = σy + μ, h′(y) = σ. So f<sub>Y</sub>(y) = f<sub>X</sub>(σy + μ)σ = σ · (1/(σ√(2π))) e<sup>−(σy)<sup>2</sup>/(2σ<sup>2</sup>)</sup> = (1/√(2π)) e<sup>−y<sup>2</sup>/2</sup>. Hence Y ~ N(0, 1): standardisation is a linear change of variables. In general, if Y = aX + b with a &gt; 0 then f<sub>Y</sub>(y) = (1/a) f<sub>X</sub>((y−b)/a).</p>
+<div class="example"><span class="exlabel">Example 2.12 (A non-linear monotone transformation).</span><p>Let X ~ U(0, 1) and Y = −ln X. Find the distribution of Y.</p></div>
+<p>Here g(x) = −ln x is strictly decreasing from ∞ to 0, h(y) = e<sup>−y</sup>, h′(y) = −e<sup>−y</sup>. Then f<sub>Y</sub>(y) = f<sub>X</sub>(e<sup>−y</sup>) · e<sup>−y</sup> = 1 · e<sup>−y</sup> for y &gt; 0. So Y ~ Exp(1). This is precisely the inverse transform method of Theorem 2.5, and it shows how a computer turns uniform variates into exponential ones.</p>
+<div class="example"><span class="exlabel">Example 2.13 (The square of a standard normal).</span><p>Let X ~ N(0, 1) and Y = X<sup>2</sup>. Find the density of Y.</p></div>
+<p>The map x ↦ x<sup>2</sup> is not monotone on ℝ, so we cannot apply Theorem 2.11 directly; use the cdf method instead. For y &gt; 0, F<sub>Y</sub>(y) = P(X<sup>2</sup> ≤ y) = P(−√y ≤ X ≤ √y) = Φ(√y) − Φ(−√y) = 2Φ(√y) − 1. Differentiating, f<sub>Y</sub>(y) = 2φ(√y) · 1/(2√y) = (1/√y) · (1/√(2π)) e<sup>−y/2</sup> = (1/√(2π)) y<sup>−1/2</sup> e<sup>−y/2</sup>. Comparing with the Gamma density, this is Gamma(1/2, 1/2), i.e. the chi-squared distribution with 1 degree of freedom.</p>
+<h3>2.7.3  The cdf method — the general technique</h3>
+<p>When g is not monotone, the reliable route is to compute the cdf of Y from first principles and then differentiate. The recipe is always the same:</p>
+<div class="num-item"><span class="num">1.</span><div>Write F<sub>Y</sub>(y) = P(g(X) ≤ y).</div></div>
+<div class="num-item"><span class="num">2.</span><div>Express the event {g(X) ≤ y} as a union of intervals in x, using the shape of g.</div></div>
+<div class="num-item"><span class="num">3.</span><div>Rewrite the probability as an integral of f<sub>X</sub> over those intervals.</div></div>
+<div class="num-item"><span class="num">4.</span><div>Differentiate with respect to y, using the Leibniz rule where the limits depend on y.</div></div>
+<div class="num-item"><span class="num">5.</span><div>If Y is mixed, do not differentiate — read the jumps of F<sub>Y</sub> directly.</div></div>
+<div class="callout thm"><span class="clabel">Theorem 2.12 (General transformation formula).</span> If g is differentiable except at finitely many points and the equation g(x) = y has finitely many roots x<sub>1</sub>(y), …, x<sub>k</sub>(y), then</div>
+<div class="eq">f<sub>Y</sub>(y) = Σ<sub>i=1</sub><sup>k</sup> f<sub>X</sub>(x<sub>i</sub>(y)) / |g′(x<sub>i</sub>(y))|.</div>
+<div class="proof"><span class="plabel">Proof.</span> On each interval between consecutive critical points of g, the function is monotone and Theorem 2.11 applies. The events corresponding to the different branches are disjoint, so the densities add. Summing the branch contributions gives the displayed formula.</div>
+<div class="example"><span class="exlabel">Example 2.14 (The Cauchy from a uniform).</span><p>Let X ~ U(−π/2, π/2) and Y = tan X. Find the density of Y.</p></div>
+<p>For y ∈ ℝ, F<sub>Y</sub>(y) = P(tan X ≤ y) = P(X ≤ arctan y) = (arctan y + π/2)/π, since X has density 1/π on the interval. Differentiating, f<sub>Y</sub>(y) = (1/π) · 1/(1 + y<sup>2</sup>). This is the standard Cauchy density — a distribution with no mean, obtained from the most innocent of starting points. It is the standard counterexample to "the average of many observations converges".</p>
+<div class="example"><span class="exlabel">Example 2.15 (The lognormal).</span><p>Let X ~ N(μ, σ<sup>2</sup>) and Y = e<sup>X</sup>. Find the density of Y.</p></div>
+<p>g(x) = e<sup>x</sup> is increasing, h(y) = ln y, h′(y) = 1/y. So for y &gt; 0, f<sub>Y</sub>(y) = f<sub>X</sub>(ln y)/y = (1/(yσ√(2π))) e<sup>−(ln y − μ)<sup>2</sup>/(2σ<sup>2</sup>)</sup>. This is the lognormal, the standard model for quantities that are products of many small multiplicative factors — incomes, stock prices, particle sizes. Note that E[Y] = e<sup>μ + σ<sup>2</sup>/2</sup> ≠ e<sup>μ</sup>: the mean is pulled above the median e<sup>μ</sup> by the long right tail.</p>
+<h2 class="sec-head" id="s20">2.8  Worked Examples</h2>
+<div class="example"><span class="exlabel">Example 2.16</span><p>The cdf of X is F(x) = 0 for x &lt; 0; = 1 − e<sup>−2x</sup> for 0 ≤ x &lt; 1; = 1 for x ≥ 1. Find P(X = 1), P(X ≤ 0.5) and E[X].</p></div>
+<p>The only jump is at x = 1: F(1<sup>−</sup>) = 1 − e<sup>−2</sup> ≈ 0.8647 and F(1) = 1, so P(X = 1) = e<sup>−2</sup> ≈ 0.1353. The distribution is mixed: a continuous part with density 2e<sup>−2x</sup> on (0, 1), plus an atom of mass e<sup>−2</sup> at 1. Then P(X ≤ 0.5) = F(0.5) = 1 − e<sup>−1</sup> ≈ 0.6321. For the mean, E[X] = ∫<sub>0</sub><sup>1</sup> x · 2e<sup>−2x</sup> dx + 1 · e<sup>−2</sup>. The integral is [−xe<sup>−2x</sup>]<sub>0</sub><sup>1</sup> + ∫<sub>0</sub><sup>1</sup> e<sup>−2x</sup> dx = −e<sup>−2</sup> + (1−e<sup>−2</sup>)/2 = 1/2 − (3/2)e<sup>−2</sup>. Adding the atom gives E[X] = 1/2 − (1/2)e<sup>−2</sup> ≈ 0.4323.</p>
+<div class="example"><span class="exlabel">Example 2.17</span><p>X has density f(x) = cx<sup>2</sup> on (0, 1) and 0 elsewhere. Find c, the cdf, E[X], Var(X) and P(0.2 &lt; X &lt; 0.6).</p></div>
+<p>Normalisation: ∫<sub>0</sub><sup>1</sup> cx<sup>2</sup> dx = c/3 = 1, so c = 3. Then F(x) = x<sup>3</sup> on (0, 1). E[X] = ∫<sub>0</sub><sup>1</sup> 3x<sup>3</sup> dx = 3/4; E[X<sup>2</sup>] = ∫<sub>0</sub><sup>1</sup> 3x<sup>4</sup> dx = 3/5; Var(X) = 3/5 − 9/16 = (48 − 45)/80 = 3/80. Finally P(0.2 &lt; X &lt; 0.6) = 0.6<sup>3</sup> − 0.2<sup>3</sup> = 0.216 − 0.008 = 0.208.</p>
+<div class="example"><span class="exlabel">Example 2.18 (Expectation of the maximum of two uniforms).</span><p>Let X, Y be independent U(0, 1) and M = max(X, Y). Find the density and mean of M.</p></div>
+<p>Use the cdf method with independence: F<sub>M</sub>(m) = P(X ≤ m, Y ≤ m) = P(X ≤ m)P(Y ≤ m) = m<sup>2</sup> for 0 ≤ m ≤ 1. Hence f<sub>M</sub>(m) = 2m and E[M] = ∫<sub>0</sub><sup>1</sup> 2m<sup>2</sup> dm = 2/3. By contrast min(X, Y) has cdf 1 − (1−m)<sup>2</sup> and mean 1/3. Both are above and below 1/2 respectively, as intuition suggests; the general order-statistic formulas are in Module 3.</p>
+<div class="example"><span class="exlabel">Example 2.19 (A Poisson expectation).</span><p>Let X ~ Pois(λ). Show E[X] = λ and Var(X) = λ.</p></div>
+<p>E[X] = Σ<sub>x≥0</sub> x e<sup>−λ</sup>λ<sup>x</sup>/x! = Σ<sub>x≥1</sub> e<sup>−λ</sup>λ<sup>x</sup>/(x−1)!. Put k = x − 1: this is λe<sup>−λ</sup> Σ<sub>k≥0</sub> λ<sup>k</sup>/k! = λe<sup>−λ</sup>e<sup>λ</sup> = λ. For the second moment, E[X(X−1)] = Σ<sub>x≥2</sub> x(x−1)e<sup>−λ</sup>λ<sup>x</sup>/x! = λ<sup>2</sup> by the same shifting trick, so E[X<sup>2</sup>] = λ<sup>2</sup> + λ and Var(X) = λ. The device of computing E[X(X−1)] rather than E[X<sup>2</sup>] is worth remembering — it is the factorial moment, and it always collapses the binomial coefficient.</p>
+<div class="example"><span class="exlabel">Example 2.20</span><p>A random variable has E[X] = 3 and Var(X) = 4. Use Chebyshev’s inequality to bound P(X ≥ 8) and P(1 &lt; X &lt; 5).</p></div>
+<p>For the first, note P(X ≥ 8) ≤ P(|X − 3| ≥ 5) ≤ 4/25 = 0.16 by Chebyshev with ε = 5. For the second, P(1 &lt; X &lt; 5) = 1 − P(|X − 3| ≥ 2) ≥ 1 − 4/4 = 0, which is vacuous — Chebyshev gives no information when ε equals one standard deviation. This illustrates the looseness of the bound.</p>
+<h2 class="sec-head" id="s21">2.9  Practice Problems with Solutions</h2>
+<div class="num-item"><span class="num">1.</span><div><strong>Problem.</strong> X has pmf p(x) = kx for x = 1, 2, 3, 4. Find k, E[X] and Var(X).</div></div>
+<p><strong>Solution.</strong> Σ x = 10, so k = 1/10. E[X] = (1/10)(1 + 4 + 9 + 16) = 3. E[X<sup>2</sup>] = (1/10)(1 + 8 + 27 + 64) = 10. Var(X) = 10 − 9 = 1.</p>
+<div class="num-item"><span class="num">2.</span><div><strong>Problem.</strong> The cdf of X is F(x) = 1 − e<sup>−x/2</sup> for x ≥ 0, 0 otherwise. Find the density, E[X], Var(X) and P(X &gt; 3).</div></div>
+<p><strong>Solution.</strong> f(x) = F′(x) = (1/2)e<sup>−x/2</sup> on x &gt; 0, so X ~ Exp(1/2). Then E[X] = 2, Var(X) = 4, and P(X &gt; 3) = 1 − F(3) = e<sup>−1.5</sup> ≈ 0.2231.</p>
+<div class="num-item"><span class="num">3.</span><div><strong>Problem.</strong> Let X ~ U(0, 1). Find the density of Y = √X and of Y = X<sup>3</sup>.</div></div>
+<p><strong>Solution.</strong> For Y = √X: h(y) = y<sup>2</sup>, h′ = 2y, so f<sub>Y</sub>(y) = 1 · 2y = 2y on (0, 1) — a Beta(2, 1) density. For Y = X<sup>3</sup>: h(y) = y<sup>1/3</sup>, h′ = (1/3)y<sup>−2/3</sup>, so f<sub>Y</sub>(y) = (1/3)y<sup>−2/3</sup> on (0, 1), which is Beta(1/3, 1). Both integrate to 1: check ∫<sub>0</sub><sup>1</sup> 2y dy = 1 and ∫<sub>0</sub><sup>1</sup>(1/3)y<sup>−2/3</sup>dy = [y<sup>1/3</sup>]<sub>0</sub><sup>1</sup> = 1.</p>
+<div class="num-item"><span class="num">4.</span><div><strong>Problem.</strong> X ~ Bin(n, p). Using indicators, show E[X] = np and Var(X) = np(1−p).</div></div>
+<p><strong>Solution.</strong> Write X = Σ I<sub>i</sub> where I<sub>i</sub> indicates success on trial i. Then E[I<sub>i</sub>] = p so E[X] = np by linearity. For the variance, Var(X) = Σ Var(I<sub>i</sub>) + 2Σ<sub>i&lt;j</sub> Cov(I<sub>i</sub>, I<sub>j</sub>). Independence makes every covariance zero, and Var(I<sub>i</sub>) = p(1−p), so Var(X) = np(1−p). Note that the independence of the trials is essential here, unlike for the mean.</p>
+<div class="num-item"><span class="num">5.</span><div><strong>Problem.</strong> Let X have density f(x) = 2x on (0, 1). Find E[1/X] and E[ln X].</div></div>
+<p><strong>Solution.</strong> E[1/X] = ∫<sub>0</sub><sup>1</sup> (1/x)(2x)dx = ∫<sub>0</sub><sup>1</sup> 2 dx = 2. E[ln X] = ∫<sub>0</sub><sup>1</sup> 2x ln x dx. Integrating by parts with u = ln x, dv = 2x dx: [x<sup>2</sup>ln x]<sub>0</sub><sup>1</sup> − ∫<sub>0</sub><sup>1</sup> x dx = 0 − 1/2 = −1/2. Note E[1/X] = 2 while 1/E[X] = 1/(2/3) = 1.5 — the two differ, as they must, since 1/x is convex and Jensen’s inequality gives E[1/X] ≥ 1/E[X].</p>
+<div class="num-item"><span class="num">6.</span><div><strong>Problem.</strong> X ~ Exp(λ). Find E[X<sup>2</sup>] and hence Var(X). Then find the median of X.</div></div>
+<p><strong>Solution.</strong> E[X<sup>2</sup>] = ∫<sub>0</sub><sup>∞</sup> x<sup>2</sup>λe<sup>−λx</sup>dx = 2/λ<sup>2</sup> (integrate by parts twice), so Var(X) = 2/λ<sup>2</sup> − 1/λ<sup>2</sup> = 1/λ<sup>2</sup>. The median m solves 1 − e<sup>−λm</sup> = 1/2, giving m = (ln 2)/λ ≈ 0.693/λ, which is less than the mean 1/λ — the right skew pulls the mean above the median.</p>
+<div class="num-item"><span class="num">7.</span><div><strong>Problem.</strong> Let X be uniform on (−1, 1). Find the density of Y = X<sup>2</sup> and identify it.</div></div>
+<p><strong>Solution.</strong> F<sub>Y</sub>(y) = P(−√y ≤ X ≤ √y) = √y for 0 ≤ y ≤ 1. Differentiating, f<sub>Y</sub>(y) = 1/(2√y) on (0, 1), which is Beta(1/2, 1). It integrates to 1 since ∫<sub>0</sub><sup>1</sup> y<sup>−1/2</sup>dy = 2.</p>
+<div class="num-item"><span class="num">8.</span><div><strong>Problem.</strong> A random variable has E[X] = 10 and Var(X) = 25. Give an upper bound for P(|X − 10| ≥ 15) and state whether the bound is useful.</div></div>
+<p><strong>Solution.</strong> By Chebyshev with ε = 15, P ≤ 25/225 = 1/9 ≈ 0.111. It is a valid but weak bound; if the distribution were normal the true value would be about 0.0027, so Chebyshev overestimates by a factor of about 40. This is the price of universality.</p>
+<div class="num-item"><span class="num">9.</span><div><strong>Problem.</strong> Let F(x) = 0 for x &lt; 0; = 1/4 + x/2 for 0 ≤ x &lt; 1; = 1 for x ≥ 1. Identify the atoms, the density, and E[X].</div></div>
+<p><strong>Solution.</strong> Check the jumps. At x = 0: F(0<sup>−</sup>) = 0 but F(0) = 1/4, so there is an <strong>atom of mass 1/4</strong> at 0. At x = 1: F(1<sup>−</sup>) = 1/4 + 1/2 = 3/4 but F(1) = 1, so there is an <strong>atom of mass 1/4</strong> at 1. Between the atoms, F is differentiable with derivative 1/2 on (0, 1), so the continuous part has density 1/2 there, contributing mass 1/2. The three pieces total 1/4 + 1/2 + 1/4 = 1, as they must. Finally E[X] = 0 · (1/4) + 1 · (1/4) + ∫<sub>0</sub><sup>1</sup> x(1/2)dx = 1/4 + 1/4 = 1/2. This is a genuinely mixed distribution, and reading it off the cdf requires only looking for jumps.</p>
+<div class="num-item"><span class="num">10.</span><div><strong>Problem.</strong> X ~ N(0, 1). Find the density of Y = |X|.</div></div>
+<p><strong>Solution.</strong> For y &gt; 0, F<sub>Y</sub>(y) = P(−y ≤ X ≤ y) = 2Φ(y) − 1, so f<sub>Y</sub>(y) = 2φ(y) = √(2/π) e<sup>−y<sup>2</sup>/2</sup>. This is the <strong>folded normal</strong> or half-normal distribution. Then E[Y] = ∫<sub>0</sub><sup>∞</sup> y√(2/π)e<sup>−y<sup>2</sup>/2</sup>dy = √(2/π) and Var(Y) = 1 − 2/π.</p>
+<div class="num-item"><span class="num">11.</span><div><strong>Problem.</strong> Show that if X has a finite second moment then P(X = 0) ≤ Var(X)/(E[X])<sup>2</sup> — or rather, state the correct inequality.</div></div>
+<p><strong>Solution.</strong> The correct statement comes from Chebyshev applied to the complement: P(X = 0) ≤ P(|X − μ| ≥ μ) ≤ σ<sup>2</sup>/μ<sup>2</sup>, valid when μ ≠ 0. So the coefficient of variation squared bounds the probability of a zero. For μ = 0 the bound is vacuous, since then P(X = 0) can be anything from 0 to 1.</p>
+<div class="num-item"><span class="num">12.</span><div><strong>Problem.</strong> X ~ U(0, 1). Find the distribution of Y = −(1/λ)ln(1 − X) and comment.</div></div>
+<p><strong>Solution.</strong> g(x) = −(1/λ)ln(1−x) is increasing, h(y) = 1 − e<sup>−λy</sup>, h′(y) = λe<sup>−λy</sup>. So f<sub>Y</sub>(y) = 1 · λe<sup>−λy</sup> for y &gt; 0: Y ~ Exp(λ). Since 1 − X is also uniform on (0, 1), the formula −(1/λ)ln U works equally well, and both are used in practice. This is the inverse transform method in its most common form.</p>
+<h2 class="sec-head" id="s22">2.10  Formula Summary — Module 2</h2>
+<div class="table-wrap"><table><thead><tr><th>Concept</th><th>Formula</th></tr></thead><tbody>
+<tr><td>pmf</td><td>p(x) = P(X = x) ≥ 0,  Σ p(x) = 1</td></tr>
+<tr><td>pdf</td><td>f(x) ≥ 0,  ∫ f = 1,  P(a&lt;X≤b) = ∫<sub>a</sub><sup>b</sup> f</td></tr>
+<tr><td>cdf</td><td>F(x) = P(X ≤ x) = ∫<sub>−∞</sub><sup>x</sup> f(t)dt = Σ<sub>t≤x</sub> p(t)</td></tr>
+<tr><td>cdf → probability</td><td>P(a&lt;X≤b) = F(b) − F(a);  P(X=a) = F(a) − F(a<sup>−</sup>)</td></tr>
+<tr><td>density from cdf</td><td>f(x) = F′(x) where differentiable</td></tr>
+<tr><td>Expectation</td><td>E[X] = Σ x p(x)  or  ∫ x f(x)dx</td></tr>
+<tr><td>LOTUS</td><td>E[g(X)] = Σ g(x)p(x)  or  ∫ g(x)f(x)dx</td></tr>
+<tr><td>Linearity</td><td>E[aX + b] = aE[X] + b;  E[ΣX<sub>i</sub>] = ΣE[X<sub>i</sub>] (always)</td></tr>
+<tr><td>Variance</td><td>Var(X) = E[X<sup>2</sup>] − (E[X])<sup>2</sup>;  Var(aX+b) = a<sup>2</sup>Var(X)</td></tr>
+<tr><td>Indicator trick</td><td>P(A) = E[1<sub>A</sub>];  count = Σ indicators</td></tr>
+<tr><td>Markov</td><td>P(X ≥ a) ≤ E[X]/a  for X ≥ 0</td></tr>
+<tr><td>Chebyshev</td><td>P(|X−μ| ≥ ε) ≤ σ<sup>2</sup>/ε<sup>2</sup></td></tr>
+<tr><td>Discrete transform</td><td>p<sub>Y</sub>(y) = Σ<sub>x: g(x)=y</sub> p<sub>X</sub>(x)</td></tr>
+<tr><td>Monotone transform</td><td>f<sub>Y</sub>(y) = f<sub>X</sub>(h(y))|h′(y)|,  h = g<sup>−1</sup></td></tr>
+<tr><td>General transform</td><td>f<sub>Y</sub>(y) = Σ<sub>i</sub> f<sub>X</sub>(x<sub>i</sub>)/|g′(x<sub>i</sub>)|  over roots of g(x)=y</td></tr>
+<tr><td>Cdf method</td><td>F<sub>Y</sub>(y) = P(g(X) ≤ y), then differentiate</td></tr>
+<tr><td>Inverse transform</td><td>U ~ U(0,1) ⇒ X = F<sup>−1</sup>(U) has cdf F</td></tr>
+</tbody></table></div>
+</section>
+<section class="module">
+  <div class="module-band">
+    <span class="module-kicker">Module 3</span>
+    <h1 class="module-title">Multiple Random Variables</h1>
+  </div>
+<p>Real problems rarely involve one quantity. A portfolio has many asset returns, a queue has arrivals and service times, a measurement has a value and an error. This module extends the theory of Module 2 to vectors, and the extension is not merely notational: new phenomena appear — dependence, correlation, and the fact that marginal distributions do not determine a joint distribution. The tools developed here (the Jacobian, convolution, conditional expectation, and the two transforms) are the ones used throughout stochastic processes.</p>
+<h2 class="sec-head" id="s23">3.1  Joint Distributions of Two Random Variables</h2>
+<div class="callout def"><span class="clabel">Definition 3.1 (Random vector).</span> A <strong>random vector</strong> is a function (X, Y) : Ω → ℝ<sup>2</sup> such that both X and Y are random variables, equivalently such that {(X, Y) ∈ B} ∈ 𝓕 for every Borel set B ⊆ ℝ<sup>2</sup>. The extension to n coordinates is immediate.</div>
+<div class="callout def"><span class="clabel">Definition 3.2 (Joint cdf).</span> The <strong>joint cumulative distribution function</strong> of (X, Y) is  F<sub>X,Y</sub>(x, y) = P(X ≤ x, Y ≤ y),  (x, y) ∈ ℝ<sup>2</sup>.</div>
+<div class="callout prop"><span class="clabel">Proposition 3.1 (Properties of a joint cdf).</span> F = F<sub>X,Y</sub> satisfies: (i) F is non-decreasing in each argument; (ii) F is right-continuous in each argument; (iii) F(x, y) → 0 if either x → −∞ or y → −∞, and F(x, y) → 1 as both tend to +∞; (iv) the <strong>rectangle inequality</strong>: for a &lt; b and c &lt; d,  P(a &lt; X ≤ b, c &lt; Y ≤ d) = F(b,d) − F(a,d) − F(b,c) + F(a,c) ≥ 0.</div>
+<div class="proof"><span class="plabel">Proof.</span> (i)–(iii) are the one-dimensional arguments applied with the other variable held fixed. (iv) The rectangle is the set difference of the strips {X ≤ b, c &lt; Y ≤ d} and {X ≤ a, c &lt; Y ≤ d}; the first has probability F(b,d) − F(b,c) and the second F(a,d) − F(a,c). Subtracting gives the displayed alternating sum, which is a probability and hence non-negative.</div>
+<div class="callout note"><span class="clabel">Note</span> Property (iv) is the one that makes the two-dimensional theory genuinely harder: a function can be non-decreasing and right-continuous in each variable and still fail (iv), so it is not a joint cdf. The single-variable test does not generalise naively.</div>
+<div class="callout def"><span class="clabel">Definition 3.3 (Jointly discrete).</span> (X, Y) is <strong>jointly discrete</strong> if it takes values in a countable set; its <strong>joint pmf</strong> is p<sub>X,Y</sub>(x, y) = P(X = x, Y = y), with p ≥ 0 and Σ<sub>x</sub>Σ<sub>y</sub> p(x, y) = 1, and P((X,Y) ∈ A) = ΣΣ<sub>(x,y)∈A</sub> p(x, y).</div>
+<div class="callout def"><span class="clabel">Definition 3.4 (Jointly continuous).</span> (X, Y) is <strong>jointly continuous</strong> if there is a <strong>joint density</strong> f<sub>X,Y</sub>(x, y) ≥ 0 with ∫∫ f = 1 and  P((X, Y) ∈ A) = ∫∫<sub>A</sub> f<sub>X,Y</sub>(x, y) dx dy.  The joint density is recovered from the cdf by f = ∂<sup>2</sup>F/∂x∂y at points of continuity.</div>
+<div class="example"><span class="exlabel">Example 3.1</span><p>A joint pmf is given by p(0,0) = 0.2, p(0,1) = 0.3, p(1,0) = 0.4, p(1,1) = 0.1. Find P(X = Y) and P(X + Y ≤ 1).</p></div>
+<p>P(X = Y) = p(0,0) + p(1,1) = 0.3. P(X + Y ≤ 1) = p(0,0) + p(0,1) + p(1,0) = 0.9, since only (1,1) fails the condition. The probabilities sum to 1, and the table can be displayed as a 2 × 2 array with row sums 0.5, 0.5 — which are the marginals.</p>
+<div class="example"><span class="exlabel">Example 3.2</span><p>Let f(x, y) = c(x + y) for 0 &lt; x &lt; 1, 0 &lt; y &lt; 1. Find c and P(X + Y &lt; 1).</p></div>
+<p>Normalisation: ∫<sub>0</sub><sup>1</sup>∫<sub>0</sub><sup>1</sup> c(x+y)dxdy = c(1/2 + 1/2) = c, so c = 1. Then P(X + Y &lt; 1) = ∫<sub>0</sub><sup>1</sup>∫<sub>0</sub><sup>1−x</sup>(x+y)dy dx = ∫<sub>0</sub><sup>1</sup> [x(1−x) + (1−x)<sup>2</sup>/2]dx = ∫<sub>0</sub><sup>1</sup>(1/2 − x<sup>2</sup>/2)dx = 1/2 − 1/6 = 1/3. Note the region of integration is a triangle, which is the standard geometry in these problems.</p>
+<div class="example"><span class="exlabel">Example 3.3 (Uniform on a region).</span><p>Let (X, Y) be uniform on the triangle x ≥ 0, y ≥ 0, x + y ≤ 1. Find the joint density.</p></div>
+<p>The area of the triangle is 1/2, so the density is the constant 2 on the triangle and 0 outside. Uniformity on a region of area A gives density 1/A there — this is the two-dimensional analogue of the uniform distribution, and it is the cleanest way to set up many geometric probability problems.</p>
+<h2 class="sec-head" id="s24">3.2  Marginal Distributions</h2>
+<div class="callout def"><span class="clabel">Definition 3.5 (Marginal distribution).</span> The <strong>marginal</strong> distributions of (X, Y) are the distributions of X and of Y considered alone:  p<sub>X</sub>(x) = Σ<sub>y</sub> p<sub>X,Y</sub>(x, y)  and  p<sub>Y</sub>(y) = Σ<sub>x</sub> p<sub>X,Y</sub>(x, y)  in the discrete case;  f<sub>X</sub>(x) = ∫<sub>−∞</sub><sup>∞</sup> f<sub>X,Y</sub>(x, y) dy  and  f<sub>Y</sub>(y) = ∫<sub>−∞</sub><sup>∞</sup> f<sub>X,Y</sub>(x, y) dx  in the continuous case. The name comes from writing the joint pmf as a table and summing along the margins.</div>
+<div class="example"><span class="exlabel">Example 3.4</span><p>For f(x, y) = x + y on the unit square, find the marginals.</p></div>
+<p>f<sub>X</sub>(x) = ∫<sub>0</sub><sup>1</sup>(x+y)dy = x + 1/2 for 0 &lt; x &lt; 1, and by symmetry f<sub>Y</sub>(y) = y + 1/2. Both integrate to 1: ∫<sub>0</sub><sup>1</sup>(x + 1/2)dx = 1/2 + 1/2 = 1.</p>
+<div class="example"><span class="exlabel">Example 3.5 (Marginals from a triangular density).</span><p>Let (X, Y) be uniform on the triangle of Example 3.3, so f = 2 there. Find f<sub>X</sub> and f<sub>Y</sub>.</p></div>
+<p>For a fixed x ∈ (0, 1), y ranges over (0, 1−x), so f<sub>X</sub>(x) = ∫<sub>0</sub><sup>1−x</sup> 2 dy = 2(1 − x). By symmetry f<sub>Y</sub>(y) = 2(1 − y). Each integrates to 1 over (0,1), and both are Beta(1, 2) densities. Notice that although the joint density is constant, the marginals are not uniform — uniformity on a region is not preserved under projection.</p>
+<div class="callout warn"><span class="clabel">Caution</span> Marginals do <strong>not</strong> determine the joint distribution. Consider the unit square with two different joint densities: f(x, y) = 1 (independent uniforms) and g(x, y) = 1 + α(2x−1)(2y−1) for |α| ≤ 1. Both have the same uniform marginals on (0, 1), because ∫<sub>0</sub><sup>1</sup>(2y−1)dy = 0. Yet they describe very different dependence structures: under f, X and Y are independent; under g with α &gt; 0 they are positively associated. <strong>Joint information is strictly more than marginal information</strong>, which is why covariance and copulas exist.</div>
+<h2 class="sec-head" id="s25">3.3  Conditional Distributions and Conditional Expectation</h2>
+<div class="callout def"><span class="clabel">Definition 3.6 (Conditional pmf and pdf).</span> If p<sub>X</sub>(x) &gt; 0, the <strong>conditional pmf of Y given X = x</strong> is  p<sub>Y|X</sub>(y | x) = p<sub>X,Y</sub>(x, y)/p<sub>X</sub>(x).  If f<sub>X</sub>(x) &gt; 0, the <strong>conditional density of Y given X = x</strong> is  f<sub>Y|X</sub>(y | x) = f<sub>X,Y</sub>(x, y)/f<sub>X</sub>(x).  In both cases the conditional object is a genuine pmf or density in y, for each fixed x.</div>
+<div class="callout note"><span class="clabel">Note</span> For jointly continuous variables, conditioning on the event {X = x} has probability zero, so the formula is not the definition of Definition 1.8. It is justified by a limiting argument: P(Y ≤ y | x &lt; X ≤ x + h) = ∫<sub>x</sub><sup>x+h</sup>∫<sub>−∞</sub><sup>y</sup> f(u,v)dv du / ∫<sub>x</sub><sup>x+h</sup> f<sub>X</sub>(u)du, and letting h ↓ 0 gives ∫<sub>−∞</sub><sup>y</sup> f<sub>X,Y</sub>(x,v)/f<sub>X</sub>(x) dv. The conditional density is the correct limiting object.</div>
+<div class="example"><span class="exlabel">Example 3.6</span><p>For f(x, y) = x + y on the unit square, find f<sub>Y|X</sub>(y | x) and P(Y &gt; 1/2 | X = x).</p></div>
+<p>f<sub>Y|X</sub>(y|x) = (x+y)/(x + 1/2) for 0 &lt; y &lt; 1. Then P(Y &gt; 1/2 | X = x) = ∫<sub>1/2</sub><sup>1</sup>(x+y)/(x+1/2)dy = [x/2 + 3/8]/(x + 1/2). At x = 0 this is (3/8)/(1/2) = 3/4; at x = 1 it is (7/8)/(3/2) = 7/12. The conditional probability depends on x, which is exactly what dependence means.</p>
+<div class="callout def"><span class="clabel">Definition 3.7 (Conditional expectation).</span> The <strong>conditional expectation of Y given X = x</strong> is  E[Y | X = x] = Σ<sub>y</sub> y p<sub>Y|X</sub>(y|x)  or  ∫ y f<sub>Y|X</sub>(y|x) dy.  The <strong>conditional expectation of Y given X</strong>, written E[Y | X], is the random variable obtained by evaluating this function at the random point X.</div>
+<div class="callout warn"><span class="clabel">Caution</span> E[Y | X = x] is a <strong>number</strong>; E[Y | X] is a <strong>random variable</strong>, a function of X. The distinction is the source of much confusion. When you write E[Y | X] = g(X), the function g is g(x) = E[Y | X = x].</div>
+<div class="callout thm"><span class="clabel">Theorem 3.2 (Law of total expectation / tower property).</span> E[Y] = E[ E[Y | X] ]. Equivalently, for any function h, E[E[Y | X] h(X)] = E[Y h(X)].</div>
+<div class="proof"><span class="plabel">Proof.</span> In the discrete case, E[E[Y|X]] = Σ<sub>x</sub> E[Y|X=x] p<sub>X</sub>(x) = Σ<sub>x</sub> [Σ<sub>y</sub> y p<sub>X,Y</sub>(x,y)/p<sub>X</sub>(x)] p<sub>X</sub>(x) = Σ<sub>x</sub>Σ<sub>y</sub> y p<sub>X,Y</sub>(x,y) = Σ<sub>y</sub> y p<sub>Y</sub>(y) = E[Y]. The continuous case is identical with integrals, and the general form follows by replacing y with y h(x) in the same computation.</div>
+<p>This is the single most-used computational identity in stochastic processes. It says: to find an unconditional mean, condition on something informative and average. In Markov chain theory it appears as the first-step analysis, where one conditions on the first transition.</p>
+<div class="callout prop"><span class="clabel">Proposition 3.3 (Properties of conditional expectation).</span> (a) If Y is a function of X alone, E[Y | X] = Y; (b) <strong>linearity</strong>: E[aY + bZ | X] = aE[Y|X] + bE[Z|X]; (c) if Y is independent of X then E[Y|X] = E[Y]; (d) E[g(X)Y | X] = g(X)E[Y|X] ("taking out what is known"); (e) the tower property iterates: E[E[Y|X,Z] | X] = E[Y|X].</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) Given X = x, Y = g(x) is a constant, whose expectation is itself. (b) Linearity of the sum or integral defining the conditional expectation. (c) Under independence p<sub>Y|X</sub>(y|x) = p<sub>Y</sub>(y), so the conditional expectation does not depend on x. (d) Given X = x, the factor g(x) is a constant and comes out of the sum. (e) Both sides equal E[Y|X] after applying the tower property twice, the inner conditioning being finer.</div>
+<div class="callout def"><span class="clabel">Definition 3.8 (Conditional variance).</span> Var(Y | X) = E[(Y − E[Y|X])<sup>2</sup> | X] = E[Y<sup>2</sup>|X] − (E[Y|X])<sup>2</sup>. The <strong>law of total variance</strong> states  Var(Y) = E[Var(Y|X)] + Var(E[Y|X]).</div>
+<div class="proof"><span class="plabel">Proof.</span> Expand: Var(Y) = E[Y<sup>2</sup>] − (E[Y])<sup>2</sup>. By the tower property E[Y<sup>2</sup>] = E[E[Y<sup>2</sup>|X]] and E[Y] = E[E[Y|X]]. Writing E[Y<sup>2</sup>|X] = Var(Y|X) + (E[Y|X])<sup>2</sup> and substituting gives Var(Y) = E[Var(Y|X)] + E[(E[Y|X])<sup>2</sup>] − (E[E[Y|X]])<sup>2</sup> = E[Var(Y|X)] + Var(E[Y|X]).</div>
+<p>The interpretation is useful: total variability splits into the variability <strong>within</strong> groups (the first term) and the variability <strong>between</strong> group means (the second). This decomposition is the foundation of the analysis of variance.</p>
+<h2 class="sec-head" id="s26">3.4  Independence of Random Variables</h2>
+<div class="callout def"><span class="clabel">Definition 3.9 (Independence).</span> Random variables X and Y are <strong>independent</strong> if  F<sub>X,Y</sub>(x, y) = F<sub>X</sub>(x) F<sub>Y</sub>(y)  for all x, y. Equivalently, P(X ∈ A, Y ∈ B) = P(X ∈ A)P(Y ∈ B) for all Borel A, B; in the discrete case p<sub>X,Y</sub> = p<sub>X</sub>p<sub>Y</sub>; in the continuous case f<sub>X,Y</sub> = f<sub>X</sub>f<sub>Y</sub> (almost everywhere).</div>
+<div class="callout prop"><span class="clabel">Proposition 3.4 (Consequences of independence).</span> (a) If X, Y are independent and g, h are functions, then g(X) and h(Y) are independent; (b) if X, Y are independent with finite expectations then E[XY] = E[X]E[Y]; (c) independence implies Cov(X, Y) = 0; (d) the variables X<sub>1</sub>, …, X<sub>n</sub> are <strong>mutually independent</strong> if for every subset of indices the joint density factorises, equivalently if the full joint factorises into all n marginals.</div>
+<div class="callout warn"><span class="clabel">Caution</span> Cov(X, Y) = 0 does <strong>not</strong> imply independence. Let X ~ N(0, 1) and Y = X<sup>2</sup>. Then E[XY] = E[X<sup>3</sup>] = 0 and E[X] = 0, so Cov(X, Y) = 0, yet Y is a deterministic function of X — they are as dependent as possible. Uncorrelatedness captures only the absence of <strong>linear</strong> association.</div>
+<div class="example"><span class="exlabel">Example 3.7</span><p>Are X and Y with f(x, y) = x + y on the unit square independent?</p></div>
+<p>No. f<sub>X</sub>(x)f<sub>Y</sub>(y) = (x + 1/2)(y + 1/2) = xy + x/2 + y/2 + 1/4, which is not x + y. For instance at (0, 0): f(0,0) = 0 but f<sub>X</sub>(0)f<sub>Y</sub>(0) = 1/4. A quick test in general: the joint density of independent variables must be a product of a function of x alone and a function of y alone. The sum x + y is not such a product.</p>
+<div class="example"><span class="exlabel">Example 3.8</span><p>Let f(x, y) = 6xy<sup>2</sup> for 0 &lt; x &lt; 1, 0 &lt; y &lt; 1. Are X and Y independent? Find the marginals.</p></div>
+<p>The density factorises as (2x)(3y<sup>2</sup>), so X and Y are independent, with f<sub>X</sub>(x) = 2x and f<sub>Y</sub>(y) = 3y<sup>2</sup>. The region being a rectangle is essential — on a triangle, a factorising density does not give independent variables because the support itself couples them.</p>
+<h2 class="sec-head" id="s27">3.5  Transformation of Random Vectors and the Jacobian</h2>
+<p>Given a random vector (X, Y) with joint density f<sub>X,Y</sub> and a transformation (U, V) = (g<sub>1</sub>(X,Y), g<sub>2</sub>(X,Y)), how do we find the joint density of (U, V)? The answer generalises Theorem 2.11, and the absolute derivative is replaced by the absolute determinant of the Jacobian matrix.</p>
+<div class="callout def"><span class="clabel">Definition 3.10 (Jacobian).</span> For a transformation u = g<sub>1</sub>(x,y), v = g<sub>2</sub>(x,y) with inverse x = h<sub>1</sub>(u,v), y = h<sub>2</sub>(u,v), the <strong>Jacobian</strong> of the inverse transformation is the determinant</div>
+<div class="eq">J = ∂(x, y)/∂(u, v) = det [ ∂x/∂u  ∂x/∂v ; ∂y/∂u  ∂y/∂v ].</div>
+<p>The Jacobian measures the local area scaling of the map: a small rectangle of area du dv in the (u,v)-plane is mapped to a region of area approximately |J| du dv in the (x,y)-plane. This is the geometric content of the change-of-variable formula.</p>
+<div class="callout thm"><span class="clabel">Theorem 3.5 (Change of variables for random vectors).</span> Let (X, Y) have joint density f<sub>X,Y</sub> on an open set D, and let (u, v) ↦ (x, y) be a one-to-one differentiable map from E onto D whose Jacobian J never vanishes on E. Then (U, V) has joint density</div>
+<div class="eq">f<sub>U,V</sub>(u, v) = f<sub>X,Y</sub>( h<sub>1</sub>(u,v), h<sub>2</sub>(u,v) ) · |J|,</div>
+<p>for (u, v) ∈ E, and zero elsewhere.</p>
+<div class="proof"><span class="plabel">Proof.</span> For a small rectangle R in the (u,v)-plane, P((U,V) ∈ R) = P((X,Y) ∈ image of R) ≈ f<sub>X,Y</sub>(x,y) · area(image of R) ≈ f<sub>X,Y</sub>(x,y)|J| · area(R). Comparing with P((U,V) ∈ R) ≈ f<sub>U,V</sub>(u,v) · area(R) gives the formula. The rigorous proof makes the approximation an integral identity via the standard multivariable substitution theorem.</div>
+<div class="callout warn"><span class="clabel">Caution</span> Compute the Jacobian of the <strong>inverse</strong> map, i.e. of (u,v) ↦ (x,y), not of the forward map — or if you compute the forward Jacobian, take its reciprocal. Getting this upside down is the most common error with Jacobians. The absolute value is also essential: a negative determinant means the map reverses orientation, which does not make a density negative.</div>
+<div class="example"><span class="exlabel">Example 3.9 (Sum and difference).</span><p>Let X, Y be independent with densities f<sub>X</sub>, f<sub>Y</sub>. Find the joint density of U = X + Y and V = X − Y.</p></div>
+<p>The inverse map is x = (u+v)/2, y = (u−v)/2, so J = det[[1/2, 1/2],[1/2, −1/2]] = −1/4 − 1/4 = −1/2, hence |J| = 1/2. Therefore f<sub>U,V</sub>(u,v) = (1/2) f<sub>X</sub>((u+v)/2) f<sub>Y</sub>((u−v)/2). Integrating out v recovers the convolution formula for the density of a sum, which is the subject of the next section.</p>
+<div class="example"><span class="exlabel">Example 3.10 (Polar coordinates — the Rayleigh distribution).</span><p>Let X, Y be independent N(0, 1). Put X = R cos Θ, Y = R sin Θ. Find the joint density of (R, Θ) and show R and Θ are independent.</p></div>
+<p>Here the forward map is (r, θ) ↦ (r cos θ, r sin θ) and J = det[[cosθ, −r sinθ],[sinθ, r cosθ]] = r cos<sup>2</sup>θ + r sin<sup>2</sup>θ = r. The joint density of X, Y is (1/2π)e<sup>−(x<sup>2</sup>+y<sup>2</sup>)/2</sup> = (1/2π)e<sup>−r<sup>2</sup>/2</sup>, so</p>
+<div class="eq">f<sub>R,Θ</sub>(r, θ) = (1/2π) e<sup>−r<sup>2</sup>/2</sup> · r = [r e<sup>−r<sup>2</sup>/2</sup>] · [1/(2π)],   r &gt; 0, 0 &lt; θ &lt; 2π.</div>
+<p>The joint density factorises into a function of r times a function of θ, so R and Θ are independent: Θ ~ U(0, 2π) and R has the <strong>Rayleigh</strong> density r e<sup>−r<sup>2</sup>/2</sup>. Moreover R<sup>2</sup> ~ Exp(1/2). This result is the geometric heart of the normal distribution and the first step of the Box–Muller algorithm.</p>
+<div class="example"><span class="exlabel">Example 3.11 (Box–Muller).</span><p>Use two independent U(0, 1) variables to generate two independent standard normal variables.</p></div>
+<p>Let U<sub>1</sub>, U<sub>2</sub> ~ U(0,1) independent. Set Θ = 2πU<sub>2</sub> and R = √(−2 ln U<sub>1</sub>). Then by the inverse transform (Theorem 2.5) Θ ~ U(0, 2π) and, since −2ln U<sub>1</sub> ~ Exp(2) implies R = √(−ln U<sub>1</sub> · 2) has the Rayleigh law, R and Θ are independent with exactly the distributions found in Example 3.10. Therefore Z<sub>1</sub> = R cos Θ and Z<sub>2</sub> = R sin Θ are independent N(0, 1). Explicitly, Z<sub>1</sub> = √(−2 ln U<sub>1</sub>) cos(2πU<sub>2</sub>) and Z<sub>2</sub> = √(−2 ln U<sub>1</sub>) sin(2πU<sub>2</sub>). This is how normal variates are actually produced in software.</p>
+<div class="example"><span class="exlabel">Example 3.12 (Product and quotient).</span><p>Let X, Y be independent positive variables with densities f<sub>X</sub>, f<sub>Y</sub>. Find the density of U = XY and of W = X/Y.</p></div>
+<p>For U = XY take the pair (U, V) = (XY, X) with inverse x = v, y = u/v. The Jacobian matrix [[∂x/∂u, ∂x/∂v],[∂y/∂u, ∂y/∂v]] = [[0, 1],[1/v, −u/v<sup>2</sup>]] has determinant −1/v, so |J| = 1/v. Hence f<sub>U,V</sub>(u,v) = f<sub>X</sub>(v) f<sub>Y</sub>(u/v)/v, and integrating out v gives f<sub>U</sub>(u) = ∫<sub>0</sub><sup>∞</sup> f<sub>X</sub>(v) f<sub>Y</sub>(u/v) (1/v) dv. For W = X/Y, the same device with the pair (X/Y, Y) gives f<sub>W</sub>(w) = ∫<sub>0</sub><sup>∞</sup> v f<sub>X</sub>(wv) f<sub>Y</sub>(v) dv.</p>
+<h2 class="sec-head" id="s28">3.6  Convolution: the Distribution of a Sum</h2>
+<p>The sum of independent random variables is the most important transformation in probability, because it is what happens when we aggregate. The formula is called convolution, and it is the reason generating functions (Section 3.9) are so effective.</p>
+<div class="callout thm"><span class="clabel">Theorem 3.6 (Convolution).</span> Let X and Y be independent. (a) If both are discrete with pmfs p<sub>X</sub>, p<sub>Y</sub>, then Z = X + Y has pmf  p<sub>Z</sub>(z) = Σ<sub>x</sub> p<sub>X</sub>(x) p<sub>Y</sub>(z − x).  (b) If both are continuous with densities f<sub>X</sub>, f<sub>Y</sub>, then Z has density  f<sub>Z</sub>(z) = ∫<sub>−∞</sub><sup>∞</sup> f<sub>X</sub>(x) f<sub>Y</sub>(z − x) dx = ∫<sub>−∞</sub><sup>∞</sup> f<sub>X</sub>(z − y) f<sub>Y</sub>(y) dy.  The operation is written f<sub>Z</sub> = f<sub>X</sub> * f<sub>Y</sub>.</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) Partition the event {Z = z} according to the value of X: {Z = z} = ⋃<sub>x</sub> {X = x, Y = z − x}, a disjoint union. Independence gives P(X = x, Y = z−x) = p<sub>X</sub>(x)p<sub>Y</sub>(z−x), and summing gives the result. (b) Use the transformation U = X + Y, V = X, which has inverse x = v, y = u − v and Jacobian determinant −1, so |J| = 1. By Theorem 3.5, f<sub>U,V</sub>(u,v) = f<sub>X</sub>(v)f<sub>Y</sub>(u−v). Integrating out v gives f<sub>U</sub>(u) = ∫ f<sub>X</sub>(v)f<sub>Y</sub>(u−v)dv.</div>
+<div class="example"><span class="exlabel">Example 3.13 (Sum of two uniforms).</span><p>Let X, Y ~ U(0, 1) independent. Find the density of Z = X + Y.</p></div>
+<p>f<sub>Z</sub>(z) = ∫<sub>0</sub><sup>1</sup> f<sub>Y</sub>(z − x)dx, and f<sub>Y</sub>(z−x) = 1 exactly when 0 ≤ z − x ≤ 1, i.e. z − 1 ≤ x ≤ z. Intersecting with (0, 1): for 0 &lt; z &lt; 1 the range is (0, z), giving f<sub>Z</sub>(z) = z; for 1 ≤ z &lt; 2 the range is (z − 1, 1), giving f<sub>Z</sub>(z) = 2 − z; outside, zero. The density is a triangle with peak 1 at z = 1 — the <strong>triangular</strong> distribution. Note the mean is 1 and the variance 1/6 = 1/12 + 1/12, as the sum rule for variances predicts.</p>
+<div class="example"><span class="exlabel">Example 3.14 (Sum of independent Poissons).</span><p>Show that if X ~ Pois(λ) and Y ~ Pois(μ) are independent, then X + Y ~ Pois(λ + μ).</p></div>
+<p>For z ≥ 0, p<sub>Z</sub>(z) = Σ<sub>x=0</sub><sup>z</sup> e<sup>−λ</sup>λ<sup>x</sup>/x! · e<sup>−μ</sup>μ<sup>z−x</sup>/(z−x)! = e<sup>−(λ+μ)</sup>/z! · Σ<sub>x=0</sub><sup>z</sup> C(z,x)λ<sup>x</sup>μ<sup>z−x</sup> = e<sup>−(λ+μ)</sup>(λ+μ)<sup>z</sup>/z!, where the binomial theorem was used in the last step. So Z ~ Pois(λ + μ). This "closure under convolution" is what makes the Poisson the natural model for counts from many independent sources.</p>
+<div class="example"><span class="exlabel">Example 3.15 (Sum of independent binomials).</span><p>Show that Bin(m, p) * Bin(n, p) = Bin(m + n, p) when the parameters p agree.</p></div>
+<p>The combinatorial argument is the cleanest: a Bin(m,p) count is the number of successes in m independent trials, and a Bin(n,p) count is the same for a disjoint set of n trials. The sum counts successes in m + n independent trials, hence Bin(m+n, p). Alternatively, use the Vandermonde identity Σ<sub>x</sub> C(m,x)C(n, z−x) = C(m+n, z) in the convolution sum. Note the identity <strong>requires the same p</strong>; Bin(3, 0.2) + Bin(4, 0.5) is not binomial.</p>
+<div class="example"><span class="exlabel">Example 3.16 (Sum of independent gammas).</span><p>Show that Gamma(α, λ) * Gamma(β, λ) = Gamma(α + β, λ), and deduce that the sum of n iid Exp(λ) variables is Gamma(n, λ).</p></div>
+<p>The convolution integral is ∫<sub>0</sub><sup>z</sup> [λ<sup>α</sup>x<sup>α−1</sup>e<sup>−λx</sup>/Γ(α)][λ<sup>β</sup>(z−x)<sup>β−1</sup>e<sup>−λ(z−x)</sup>/Γ(β)]dx = λ<sup>α+β</sup>e<sup>−λz</sup>/[Γ(α)Γ(β)] · ∫<sub>0</sub><sup>z</sup>x<sup>α−1</sup>(z−x)<sup>β−1</sup>dx. Substituting x = zu turns the last integral into z<sup>α+β−1</sup>B(α,β) = z<sup>α+β−1</sup>Γ(α)Γ(β)/Γ(α+β), and the gamma factors cancel to leave the Gamma(α+β, λ) density. Since Exp(λ) = Gamma(1, λ), induction gives the sum of n exponentials as Gamma(n, λ), i.e. the Erlang distribution — the waiting time to the n-th arrival of a Poisson process.</p>
+<div class="example"><span class="exlabel">Example 3.17 (Sum of independent normals).</span><p>Show that if X ~ N(μ<sub>1</sub>, σ<sub>1</sub><sup>2</sup>) and Y ~ N(μ<sub>2</sub>, σ<sub>2</sub><sup>2</sup>) are independent, then X + Y ~ N(μ<sub>1</sub>+μ<sub>2</sub>, σ<sub>1</sub><sup>2</sup>+σ<sub>2</sub><sup>2</sup>).</p></div>
+<p>The convolution integral can be evaluated by completing the square in the exponent, but the cleanest proof uses moment generating functions (Example 3.26): M<sub>X+Y</sub>(t) = M<sub>X</sub>(t)M<sub>Y</sub>(t) = exp(μ<sub>1</sub>t + σ<sub>1</sub><sup>2</sup>t<sup>2</sup>/2) · exp(μ<sub>2</sub>t + σ<sub>2</sub><sup>2</sup>t<sup>2</sup>/2) = exp((μ<sub>1</sub>+μ<sub>2</sub>)t + (σ<sub>1</sub><sup>2</sup>+σ<sub>2</sub><sup>2</sup>)t<sup>2</sup>/2), which is the mgf of the stated normal, and mgfs are unique. This illustrates the general principle: <strong>convolutions become products under transforms</strong>.</p>
+<div class="example"><span class="exlabel">Example 3.18 (Difference of normals).</span><p>If X, Y are independent N(0, 1), find the distribution of X − Y.</p></div>
+<p>Write X − Y = X + (−Y). Since −Y ~ N(0, 1) and is independent of X, the sum is N(0, 2). This also shows that the difference of two iid standard normals has <strong>twice</strong> the variance of either — a fact that surprises students who expect the difference of similar quantities to be small. The variance adds because the errors are independent; if the two measurements shared a common error component, the difference would be less variable.</p>
+<h2 class="sec-head" id="s29">3.7  Functions of Random Variables</h2>
+<div class="callout thm"><span class="clabel">Theorem 3.7 (Expectation of a function of two variables).</span> For any measurable g : ℝ<sup>2</sup> → ℝ,  E[g(X, Y)] = Σ<sub>x</sub>Σ<sub>y</sub> g(x,y) p<sub>X,Y</sub>(x,y)  or  E[g(X, Y)] = ∫∫ g(x,y) f<sub>X,Y</sub>(x,y) dx dy,  provided the sum or integral converges absolutely.</div>
+<p>This is the two-dimensional LOTUS: to average a function of (X, Y) you never need the distribution of that function. It is why the covariance formula is so easy, and why expectations of sums, products and indicators of two variables can be computed directly from the joint distribution.</p>
+<div class="callout prop"><span class="clabel">Proposition 3.8 (Linearity in two dimensions).</span> E[aX + bY + c] = aE[X] + bE[Y] + c, with no independence assumption, and E[XY] = E[X]E[Y] under independence. More generally E[Σ<sub>i</sub> g<sub>i</sub>(X<sub>i</sub>)] = Σ<sub>i</sub> E[g<sub>i</sub>(X<sub>i</sub>)] whenever each g<sub>i</sub> involves only one variable.</div>
+<h3>3.7.1  Maxima and minima</h3>
+<p>For the maximum and minimum, the cdf method is unavoidable — but it is easy, because the events factorise. For independent X, Y:</p>
+<div class="eq">F<sub>max</sub>(m) = P(X ≤ m, Y ≤ m) = F<sub>X</sub>(m)F<sub>Y</sub>(m),   F<sub>min</sub>(m) = 1 − [1 − F<sub>X</sub>(m)][1 − F<sub>Y</sub>(m)].</div>
+<p>The minimum formula comes from P(min &gt; m) = P(X &gt; m)P(Y &gt; m). For n iid variables with common cdf F, these become F<sub>max</sub>(m) = F(m)<sup>n</sup> and F<sub>min</sub>(m) = 1 − [1 − F(m)]<sup>n</sup>, so differentiating gives</p>
+<div class="eq">f<sub>max</sub>(m) = n F(m)<sup>n−1</sup> f(m),   f<sub>min</sub>(m) = n [1 − F(m)]<sup>n−1</sup> f(m).</div>
+<p>These are the first and last <strong>order statistics</strong>, and they are the reason the minimum of exponentials is exponential with rate nλ: the waiting time for the first of n independent Poisson clocks is exponential with the summed rate.</p>
+<div class="example"><span class="exlabel">Example 3.19 (Minimum of exponentials).</span><p>Let X<sub>1</sub>, …, X<sub>n</sub> be iid Exp(λ). Show that min<sub>i</sub> X<sub>i</sub> ~ Exp(nλ).</p></div>
+<p>F<sub>min</sub>(m) = 1 − [1 − (1 − e<sup>−λm</sup>)]<sup>n</sup> = 1 − e<sup>−nλm</sup> for m &gt; 0, which is the Exp(nλ) cdf. So E[min] = 1/(nλ): with n servers working in parallel, the expected time to the first completion is 1/n of the single-server time. This is a first-step-analysis result that recurs in continuous-time Markov chains.</p>
+<div class="example"><span class="exlabel">Example 3.20</span><p>Let X, Y be independent U(0, 1). Find E[max(X,Y)] and E[min(X,Y)], and verify that the two expectations add to E[X] + E[Y].</p></div>
+<p>F<sub>max</sub>(m) = m<sup>2</sup> so E[max] = ∫<sub>0</sub><sup>1</sup>2m<sup>2</sup>dm = 2/3, and F<sub>min</sub>(m) = 1−(1−m)<sup>2</sup> so E[min] = ∫<sub>0</sub><sup>1</sup>2m(1−m)dm = 1/3. Sum: 1, which equals E[X] + E[Y] = 1/2 + 1/2. This is not a coincidence: max(X,Y) + min(X,Y) = X + Y identically, so by linearity the expectations must add. A useful check on any such computation.</p>
+<h2 class="sec-head" id="s30">3.8  Joint Moments, Covariance and Correlation</h2>
+<div class="callout def"><span class="clabel">Definition 3.11 (Joint moments).</span> The <strong>(i, j) joint moment</strong> of X and Y is E[X<sup>i</sup>Y<sup>j</sup>]; the corresponding <strong>joint central moment</strong> is E[(X−μ<sub>X</sub>)<sup>i</sup>(Y−μ<sub>Y</sub>)<sup>j</sup>]. The mixed moment with i = j = 1 is the covariance.</div>
+<div class="callout def"><span class="clabel">Definition 3.12 (Covariance).</span> Cov(X, Y) = E[(X − μ<sub>X</sub>)(Y − μ<sub>Y</sub>)] = E[XY] − E[X]E[Y].</div>
+<div class="callout prop"><span class="clabel">Proposition 3.9 (Properties of covariance).</span> (a) Cov(X, X) = Var(X); (b) Cov(X, Y) = Cov(Y, X); (c) <strong>bilinearity</strong>: Cov(aX + b, cY + d) = ac Cov(X, Y), and Cov(X, Y + Z) = Cov(X, Y) + Cov(X, Z); (d) Var(X + Y) = Var(X) + Var(Y) + 2Cov(X, Y), and Var(X − Y) = Var(X) + Var(Y) − 2Cov(X, Y); (e) Cov(X, Y) = 0 if X and Y are independent.</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) and (b) are immediate from the definition. (c) Expand: E[(aX+b − aμ<sub>X</sub> − b)(cY+d − cμ<sub>Y</sub> − d)] = acE[(X−μ<sub>X</sub>)(Y−μ<sub>Y</sub>)]. The second part follows by linearity of expectation applied to (Y+Z) − (μ<sub>Y</sub> + μ<sub>Z</sub>). (d) Expand the square of the sum of the centred variables and use linearity. (e) Under independence E[XY] = E[X]E[Y], so the expression in Definition 3.12 vanishes.</div>
+<p>For a vector X = (X<sub>1</sub>, …, X<sub>n</sub>), the covariances are collected in the <strong>covariance matrix</strong> Σ with entries Σ<sub>ij</sub> = Cov(X<sub>i</sub>, X<sub>j</sub>). It is symmetric and <strong>positive semi-definite</strong>: for any constant vector a, a<sup>T</sup>Σa = Var(a<sup>T</sup>X) ≥ 0. Conversely, every symmetric positive semi-definite matrix is the covariance matrix of some random vector.</p>
+<div class="callout def"><span class="clabel">Definition 3.13 (Correlation coefficient).</span> ρ(X, Y) = Cov(X, Y) / (σ<sub>X</sub> σ<sub>Y</sub>), defined when both variances are positive and finite.</div>
+<div class="callout thm"><span class="clabel">Theorem 3.10 (Properties of the correlation coefficient).</span> (a) −1 ≤ ρ ≤ 1; (b) ρ = 1 if and only if Y = aX + b with a &gt; 0 almost surely, and ρ = −1 if and only if Y = aX + b with a &lt; 0; (c) ρ is invariant under positive affine changes of either variable: ρ(aX + b, cY + d) = ρ(X, Y) for a, c &gt; 0.</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) Consider the variance of the standardised sum: 0 ≤ Var(X/σ<sub>X</sub> ± Y/σ<sub>Y</sub>) = 1 + 1 ± 2ρ, which gives ρ ≤ 1 and ρ ≥ −1. Equivalently, apply the Cauchy–Schwarz inequality to the centred variables. (b) Equality in Cauchy–Schwarz holds exactly when the two centred variables are proportional. (c) The constants cancel between numerator and denominator.</div>
+<div class="callout note"><span class="clabel">Note</span> The correlation coefficient measures only <strong>linear</strong> association, and it is not invariant under non-linear transformations. It is possible to have ρ = 0 while Y = X<sup>2</sup> — take X ~ N(0, 1) — and it is possible to have ρ close to 1 with a strongly non-linear relationship. Anscombe’s quartet is the classic warning: four datasets with identical ρ and identical marginal statistics, and completely different structures. Always plot.</div>
+<div class="example"><span class="exlabel">Example 3.21</span><p>Let X, Y have the joint pmf p(0,0) = 0.2, p(0,1) = 0.3, p(1,0) = 0.4, p(1,1) = 0.1. Find Cov(X, Y) and ρ.</p></div>
+<p>The marginals are P(X=0) = 0.5, P(X=1) = 0.5 and the same for Y, so E[X] = E[Y] = 0.5 and Var(X) = Var(Y) = 0.25. E[XY] = p(1,1) = 0.1, so Cov(X,Y) = 0.1 − 0.25 = −0.15, and ρ = −0.15/0.25 = −0.6. The negative covariance is visible in the table: the cell (1,1) is small compared with what independence would give (0.25).</p>
+<div class="example"><span class="exlabel">Example 3.22 (Variance of a sum of correlated variables).</span><p>X and Y have Var(X) = 4, Var(Y) = 9 and ρ = 0.5. Find Var(X + Y) and Var(X − Y).</p></div>
+<p>Cov(X,Y) = ρσ<sub>X</sub>σ<sub>Y</sub> = 0.5 · 2 · 3 = 3. Then Var(X+Y) = 4 + 9 + 6 = 19 and Var(X−Y) = 4 + 9 − 6 = 7. Positive correlation makes the sum more variable and the difference less variable than independence would — the reason diversification reduces portfolio risk, and the reason a paired design is more powerful than two independent samples.</p>
+<div class="example"><span class="exlabel">Example 3.23</span><p>Let X ~ U(0, 1) and Y = X<sup>2</sup>. Compute Cov(X, Y).</p></div>
+<p>E[X] = 1/2, E[Y] = E[X<sup>2</sup>] = 1/3, E[XY] = E[X<sup>3</sup>] = 1/4. So Cov(X,Y) = 1/4 − 1/6 = 1/12. Also Var(X) = 1/12 and Var(Y) = E[X<sup>4</sup>] − 1/9 = 1/5 − 1/9 = 4/45. Hence ρ = (1/12)/√[(1/12)(4/45)] = (1/12)/√(1/135) ≈ 0.968. So although the relation is non-linear, it is monotone and the correlation is high — a reminder that ρ picks up monotone association reasonably well but says nothing about linearity of the relationship.</p>
+<h2 class="sec-head" id="s31">3.9  Moment Generating Functions</h2>
+<div class="callout def"><span class="clabel">Definition 3.14 (Moment generating function).</span> The <strong>moment generating function</strong> (mgf) of X is  M<sub>X</sub>(t) = E[e<sup>tX</sup>],  defined for those real t for which the expectation is finite. It always exists at t = 0, where M<sub>X</sub>(0) = 1, and for most standard distributions it exists in an open interval (-δ, δ) around 0.</div>
+<div class="callout thm"><span class="clabel">Theorem 3.11 (Moments from the mgf).</span> If M<sub>X</sub> is finite in a neighbourhood of 0, then all moments of X are finite and  E[X<sup>k</sup>] = M<sub>X</sub><sup>(k)</sup>(0),  the k-th derivative evaluated at t = 0.</div>
+<div class="proof"><span class="plabel">Proof.</span> Differentiate under the expectation sign: d/dt E[e<sup>tX</sup>] = E[X e<sup>tX</sup>], and after k differentiations M<sub>X</sub><sup>(k)</sup>(t) = E[X<sup>k</sup>e<sup>tX</sup>]. Setting t = 0 gives E[X<sup>k</sup>]. The interchange of derivative and expectation is justified by dominated convergence on the interval where the mgf is finite.</div>
+<div class="callout thm"><span class="clabel">Theorem 3.12 (Uniqueness and independence).</span> (a) <strong>Uniqueness:</strong> if M<sub>X</sub>(t) = M<sub>Y</sub>(t) for all t in an open interval around 0, then X and Y have the same distribution. (b) <strong>Products:</strong> if X and Y are independent, then M<sub>X+Y</sub>(t) = M<sub>X</sub>(t)M<sub>Y</sub>(t). (c) <strong>Linear transformations:</strong> M<sub>aX+b</sub>(t) = e<sup>bt</sup>M<sub>X</sub>(at).</div>
+<div class="proof"><span class="plabel">Proof.</span> (b) M<sub>X+Y</sub>(t) = E[e<sup>t(X+Y)</sup>] = E[e<sup>tX</sup>e<sup>tY</sup>] = E[e<sup>tX</sup>]E[e<sup>tY</sup>] by independence. (c) M<sub>aX+b</sub>(t) = E[e<sup>t(aX+b)</sup>] = e<sup>bt</sup>E[e<sup>taX</sup>] = e<sup>bt</sup>M<sub>X</sub>(at). Part (a) is the deepest of the three: it follows from the uniqueness of the Laplace transform, or from the characteristic-function inversion formula of Section 3.10.</div>
+<p>The practical consequence of (a) and (b) is enormous: to identify the distribution of a sum of independent variables, multiply the mgfs and recognise the result. This replaces the convolution integral entirely, and it is why Example 3.17 was so short.</p>
+<div class="table-wrap"><table><thead><tr><th>Distribution</th><th>mgf  M(t)</th><th>Valid for</th></tr></thead><tbody>
+<tr><td>Bernoulli(p)</td><td>1 − p + p e<sup>t</sup></td><td>all t</td></tr>
+<tr><td>Binomial(n, p)</td><td>(1 − p + p e<sup>t</sup>)<sup>n</sup></td><td>all t</td></tr>
+<tr><td>Poisson(λ)</td><td>exp(λ(e<sup>t</sup> − 1))</td><td>all t</td></tr>
+<tr><td>Geometric(p)</td><td>p e<sup>t</sup> / (1 − (1−p)e<sup>t</sup>)</td><td>t &lt; −ln(1−p)</td></tr>
+<tr><td>Uniform(a, b)</td><td>(e<sup>bt</sup> − e<sup>at</sup>) / [t(b−a)]</td><td>all t, M(0) = 1</td></tr>
+<tr><td>Exponential(λ)</td><td>λ / (λ − t)</td><td>t &lt; λ</td></tr>
+<tr><td>Gamma(α, λ)</td><td>(λ/(λ − t))<sup>α</sup></td><td>t &lt; λ</td></tr>
+<tr><td>Normal(μ, σ<sup>2</sup>)</td><td>exp(μt + σ<sup>2</sup>t<sup>2</sup>/2)</td><td>all t</td></tr>
+<tr><td>Chi-squared(n)</td><td>(1 − 2t)<sup>−n/2</sup></td><td>t &lt; 1/2</td></tr>
+</tbody></table></div>
+<div class="example"><span class="exlabel">Example 3.24</span><p>Use the mgf to find E[X] and Var(X) for X ~ Exp(λ).</p></div>
+<p>M(t) = λ/(λ − t) = (1 − t/λ)<sup>−1</sup>. Then M′(t) = (1/λ)(1 − t/λ)<sup>−2</sup>, so M′(0) = 1/λ = E[X]. Next M″(t) = (2/λ<sup>2</sup>)(1 − t/λ)<sup>−3</sup>, so M″(0) = 2/λ<sup>2</sup> = E[X<sup>2</sup>], giving Var(X) = 2/λ<sup>2</sup> − 1/λ<sup>2</sup> = 1/λ<sup>2</sup>. The mgf route avoids integration by parts entirely.</p>
+<div class="example"><span class="exlabel">Example 3.25 (Sum of Poissons via mgf).</span><p>Re-derive Example 3.14 using mgfs.</p></div>
+<p>M<sub>X+Y</sub>(t) = exp(λ(e<sup>t</sup>−1)) · exp(μ(e<sup>t</sup>−1)) = exp((λ+μ)(e<sup>t</sup>−1)), which is the mgf of Pois(λ+μ). By uniqueness, X + Y ~ Pois(λ+μ). One line, versus the binomial-theorem argument of Example 3.14.</p>
+<div class="example"><span class="exlabel">Example 3.26 (Sum of normals via mgf).</span><p>Prove the closure of the normal family under addition.</p></div>
+<p>M<sub>X+Y</sub>(t) = exp(μ<sub>1</sub>t + σ<sub>1</sub><sup>2</sup>t<sup>2</sup>/2)exp(μ<sub>2</sub>t + σ<sub>2</sub><sup>2</sup>t<sup>2</sup>/2) = exp((μ<sub>1</sub>+μ<sub>2</sub>)t + (σ<sub>1</sub><sup>2</sup>+σ<sub>2</sub><sup>2</sup>)t<sup>2</sup>/2), the mgf of N(μ<sub>1</sub>+μ<sub>2</sub>, σ<sub>1</sub><sup>2</sup>+σ<sub>2</sub><sup>2</sup>). Uniqueness gives the result. More generally, any linear combination Σ a<sub>i</sub>X<sub>i</sub> of independent normals is normal with mean Σ a<sub>i</sub>μ<sub>i</sub> and variance Σ a<sub>i</sub><sup>2</sup>σ<sub>i</sub><sup>2</sup> — the fact that makes linear regression tractable.</p>
+<div class="callout warn"><span class="clabel">Caution</span> The mgf need not exist. The Cauchy distribution has M(t) = ∞ for every t ≠ 0, because e<sup>tX</sup> has infinite expectation for the heavy-tailed Cauchy density; the lognormal likewise has no mgf for t &gt; 0. This is not a technicality — it is the reason the characteristic function is introduced in the next section.</div>
+<h2 class="sec-head" id="s32">3.10  Characteristic Functions</h2>
+<div class="callout def"><span class="clabel">Definition 3.15 (Characteristic function).</span> The <strong>characteristic function</strong> (cf) of X is  φ<sub>X</sub>(t) = E[e<sup>itX</sup>] = E[cos(tX)] + i E[sin(tX)],  t ∈ ℝ, where i = √(−1).</div>
+<p>Because |e<sup>itX</sup>| = 1, the expectation defining φ always exists — for every random variable, every distribution, every t. That single fact is the reason the characteristic function, rather than the mgf, is the tool of the general theory. It is also why the cf is complex-valued while the mgf is real.</p>
+<div class="callout prop"><span class="clabel">Proposition 3.13 (Elementary properties).</span> (a) φ(0) = 1 and |φ(t)| ≤ 1 for all t; (b) φ is uniformly continuous on ℝ; (c) φ<sub>-X</sub>(t) = conjugate of φ<sub>X</sub>(t); (d) φ is real-valued if and only if X is symmetric about 0; (e) if X and Y are independent, φ<sub>X+Y</sub> = φ<sub>X</sub>φ<sub>Y</sub>; (f) φ<sub>aX+b</sub>(t) = e<sup>itb</sup>φ<sub>X</sub>(at).</div>
+<div class="proof"><span class="plabel">Proof.</span> (a) |e<sup>itX</sup>| = 1 so the modulus of its expectation is at most 1. (b) |φ(t+h) − φ(t)| ≤ E|e<sup>itX</sup>(e<sup>ihX</sup> − 1)| = E|e<sup>ihX</sup> − 1|, which is independent of t and tends to 0 as h → 0 by dominated convergence. (c) The conjugate of e<sup>itX</sup> is e<sup>−itX</sup>. (d) If X =<sub>d</sub> −X then φ is real; the converse follows from the inversion formula. (e) Same argument as for the mgf. (f) Immediate from the definition.</div>
+<div class="callout thm"><span class="clabel">Theorem 3.14 (Inversion and uniqueness).</span> If φ is integrable, then X has a continuous density given by  f<sub>X</sub>(x) = (1/2π) ∫<sub>−∞</sub><sup>∞</sup> e<sup>−itx</sup> φ<sub>X</sub>(t) dt.  In general, two random variables with the same characteristic function have the same distribution.</div>
+<p>The inversion formula is a Fourier inversion: φ is (up to a sign) the Fourier transform of the distribution, and f is the inverse transform. This makes the characteristic function the natural bridge between probability and harmonic analysis, and it is the mechanism behind the central limit theorem.</p>
+<div class="callout thm"><span class="clabel">Theorem 3.15 (Moments from the cf).</span> If E|X|<sup>k</sup> &lt; ∞ then φ has k continuous derivatives and  φ<sup>(k)</sup>(0) = i<sup>k</sup> E[X<sup>k</sup>].  In particular φ′(0) = iE[X] and φ″(0) = −E[X<sup>2</sup>].</div>
+<p>The relation to the mgf is simply φ<sub>X</sub>(t) = M<sub>X</sub>(it) whenever the mgf exists in a neighbourhood of 0. So the cf is the mgf continued analytically to the imaginary axis — which is exactly why it always exists.</p>
+<div class="callout thm"><span class="clabel">Theorem 3.16 (Lévy’s continuity theorem).</span> Let X<sub>n</sub> have characteristic functions φ<sub>n</sub>. Then X<sub>n</sub> converges in distribution to X if and only if φ<sub>n</sub>(t) → φ(t) for every t, where φ is continuous at 0; in that case φ is the characteristic function of X.</div>
+<p>This is the theorem that makes limit theorems provable. Convergence in distribution is a statement about cdfs at every continuity point, which is hard to handle directly; the continuity theorem replaces it with pointwise convergence of functions that always exist and are easy to compute for sums. The classical proof of the central limit theorem is exactly this: compute φ of the standardised sum, take the pointwise limit, and recognise exp(−t<sup>2</sup>/2) as the cf of N(0, 1).</p>
+<div class="table-wrap"><table><thead><tr><th>Distribution</th><th>characteristic function  φ(t)</th></tr></thead><tbody>
+<tr><td>Bernoulli(p)</td><td>1 − p + p e<sup>it</sup></td></tr>
+<tr><td>Binomial(n, p)</td><td>(1 − p + p e<sup>it</sup>)<sup>n</sup></td></tr>
+<tr><td>Poisson(λ)</td><td>exp(λ(e<sup>it</sup> − 1))</td></tr>
+<tr><td>Geometric(p)</td><td>p e<sup>it</sup> / (1 − (1−p)e<sup>it</sup>)</td></tr>
+<tr><td>Uniform(a, b)</td><td>(e<sup>itb</sup> − e<sup>ita</sup>) / [it(b−a)]</td></tr>
+<tr><td>Exponential(λ)</td><td>λ / (λ − it)</td></tr>
+<tr><td>Gamma(α, λ)</td><td>(λ/(λ − it))<sup>α</sup></td></tr>
+<tr><td>Normal(μ, σ<sup>2</sup>)</td><td>exp(iμt − σ<sup>2</sup>t<sup>2</sup>/2)</td></tr>
+<tr><td>Cauchy(θ)</td><td>e<sup>itθ − |t|</sup></td></tr>
+</tbody></table></div>
+<div class="example"><span class="exlabel">Example 3.27 (cf of the normal).</span><p>Verify the characteristic function of N(0, 1) and use it to find E[X<sup>2</sup>].</p></div>
+<p>For Z ~ N(0,1), φ(t) = e<sup>−t<sup>2</sup>/2</sup>. Then φ′(t) = −t e<sup>−t<sup>2</sup>/2</sup> so φ′(0) = 0, giving E[Z] = φ′(0)/i = 0. Next φ″(t) = (t<sup>2</sup> − 1)e<sup>−t<sup>2</sup>/2</sup> so φ″(0) = −1, and E[Z<sup>2</sup>] = φ″(0)/i<sup>2</sup> = −1/(−1) = 1. Both agree with direct computation, and the derivative route required no integration at all.</p>
+<div class="example"><span class="exlabel">Example 3.28 (cf of the Cauchy).</span><p>Show that the standard Cauchy characteristic function is e<sup>−|t|</sup>, and explain why the derivative at 0 does not exist.</p></div>
+<p>The computation is a contour integral, or a direct evaluation of ∫ e<sup>itx</sup>/[π(1+x<sup>2</sup>)]dx, which yields e<sup>−|t|</sup>. Notice the kink at t = 0: the left derivative is +1 and the right derivative is −1. Since φ′(0) does not exist, Theorem 3.15 does not apply — and correctly so, because the Cauchy distribution has no mean. The failure of differentiability of the cf at the origin is the analytic signature of a heavy tail.</p>
+<div class="example"><span class="exlabel">Example 3.29 (The cf proof of the CLT, in outline).</span><p>Let X<sub>1</sub>, …, X<sub>n</sub> be iid with mean μ and variance σ<sup>2</sup>, and let Z<sub>n</sub> = (ΣX<sub>i</sub> − nμ)/(σ√n). Show Z<sub>n</sub> converges in distribution to N(0, 1).</p></div>
+<p>Write Y<sub>i</sub> = (X<sub>i</sub> − μ)/σ, so the Y<sub>i</sub> are iid with mean 0 and variance 1, and Z<sub>n</sub> = (1/√n)ΣY<sub>i</sub>. By properties (e) and (f), φ<sub>Z<sub>n</sub></sub>(t) = [φ<sub>Y</sub>(t/√n)]<sup>n</sup>. Expanding φ<sub>Y</sub> about 0 using φ(0) = 1, φ′(0) = 0 and φ″(0) = −1 gives φ<sub>Y</sub>(u) = 1 − u<sup>2</sup>/2 + o(u<sup>2</sup>). Hence φ<sub>Z<sub>n</sub></sub>(t) = [1 − t<sup>2</sup>/(2n) + o(1/n)]<sup>n</sup> → e<sup>−t<sup>2</sup>/2</sup>, which is the cf of N(0,1). Lévy’s continuity theorem then gives the result. This is the standard proof, and it shows why characteristic functions are indispensable.</p>
+<h2 class="sec-head" id="s33">3.11  Worked Examples</h2>
+<div class="example"><span class="exlabel">Example 3.30</span><p>Let f(x, y) = 8xy for 0 &lt; x &lt; y &lt; 1. Verify it is a density, find the marginals and decide whether X and Y are independent.</p></div>
+<p>Normalisation: ∫<sub>0</sub><sup>1</sup>∫<sub>0</sub><sup>y</sup> 8xy dx dy = ∫<sub>0</sub><sup>1</sup> 4y<sup>3</sup>dy = 1. Marginal of X: f<sub>X</sub>(x) = ∫<sub>x</sub><sup>1</sup> 8xy dy = 4x(1 − x<sup>2</sup>) for 0 &lt; x &lt; 1. Marginal of Y: f<sub>Y</sub>(y) = ∫<sub>0</sub><sup>y</sup>8xy dx = 4y<sup>3</sup>. The product f<sub>X</sub>f<sub>Y</sub> = 16xy<sup>3</sup>(1−x<sup>2</sup>) ≠ 8xy, so X and Y are dependent — indeed the support x &lt; y forces dependence. Then E[X] = ∫<sub>0</sub><sup>1</sup>x · 4x(1−x<sup>2</sup>)dx = 4(1/3 − 1/5) = 8/15 and E[Y] = ∫<sub>0</sub><sup>1</sup>4y<sup>4</sup>dy = 4/5.</p>
+<div class="example"><span class="exlabel">Example 3.31</span><p>X and Y are independent with X ~ Exp(λ) and Y ~ Exp(μ), λ ≠ μ. Find the density of Z = X + Y and P(X &lt; Y).</p></div>
+<p>By convolution, f<sub>Z</sub>(z) = ∫<sub>0</sub><sup>z</sup>λe<sup>−λx</sup>μe<sup>−μ(z−x)</sup>dx = λμe<sup>−μz</sup>∫<sub>0</sub><sup>z</sup>e<sup>−(λ−μ)x</sup>dx = λμ[e<sup>−μz</sup> − e<sup>−λz</sup>]/(λ − μ). For the second part, P(X &lt; Y) = ∫<sub>0</sub><sup>∞</sup>P(Y &gt; x)λe<sup>−λx</sup>dx = ∫<sub>0</sub><sup>∞</sup>e<sup>−μx</sup>λe<sup>−λx</sup>dx = λ/(λ + μ). This has the pleasant interpretation: among two competing exponential clocks, the probability that the first rings is its rate divided by the total rate.</p>
+<div class="example"><span class="exlabel">Example 3.32 (Order statistics of uniforms).</span><p>Let X<sub>(1)</sub> ≤ X<sub>(2)</sub> ≤ ⋯ ≤ X<sub>(n)</sub> be the ordered values of n iid U(0, 1) variables. Find the density of X<sub>(k)</sub>.</p></div>
+<p>The event {X<sub>(k)</sub> ≤ x} means at least k of the X<sub>i</sub> are ≤ x, so F<sub>(k)</sub>(x) = Σ<sub>j=k</sub><sup>n</sup> C(n, j)x<sup>j</sup>(1−x)<sup>n−j</sup>. Differentiating (or arguing directly) gives f<sub>(k)</sub>(x) = n C(n−1, k−1) x<sup>k−1</sup>(1−x)<sup>n−k</sup>, which is Beta(k, n−k+1). Hence E[X<sub>(k)</sub>] = k/(n+1) — the order statistics divide the interval into n + 1 equal expected pieces. For k = n this gives n/(n+1), consistent with Example 2.18.</p>
+<div class="example"><span class="exlabel">Example 3.33</span><p>Let X, Y be independent N(0, 1). Find the density of Z = X/Y.</p></div>
+<p>Use the ratio formula from Example 3.12 with both variables standard normal, or the Jacobian method with (Z, V) = (X/Y, Y): x = zv, y = v, and J = det[[v, z],[0, 1]] = v, so |J| = |v|. Then f<sub>Z,V</sub>(z,v) = f<sub>X</sub>(zv)f<sub>Y</sub>(v)|v| = (1/2π)e<sup>−v<sup>2</sup>(z<sup>2</sup>+1)/2</sup>|v|. Integrating over v ∈ ℝ: f<sub>Z</sub>(z) = (1/2π) · 2∫<sub>0</sub><sup>∞</sup> v e<sup>−v<sup>2</sup>(1+z<sup>2</sup>)/2</sup>dv = (1/π) · 1/(1+z<sup>2</sup>). So the ratio of two independent standard normals is <strong>standard Cauchy</strong> — a striking result: a ratio of well-behaved variables has no mean at all.</p>
+<div class="example"><span class="exlabel">Example 3.34</span><p>Let (X, Y) have joint density f(x,y) = 2 on the triangle 0 &lt; x &lt; y &lt; 1. Find E[X | Y = y] and verify the tower property.</p></div>
+<p>The marginal of Y is f<sub>Y</sub>(y) = ∫<sub>0</sub><sup>y</sup>2dx = 2y. So f<sub>X|Y</sub>(x|y) = 2/(2y) = 1/y on (0, y), i.e. X given Y = y is uniform on (0, y). Hence E[X | Y = y] = y/2, so E[X|Y] = Y/2. Then E[E[X|Y]] = E[Y]/2. Since f<sub>Y</sub>(y) = 2y on (0,1), E[Y] = ∫<sub>0</sub><sup>1</sup>2y<sup>2</sup>dy = 2/3, giving 1/3. Directly: E[X] = ∫<sub>0</sub><sup>1</sup>∫<sub>0</sub><sup>y</sup>2x dx dy = ∫<sub>0</sub><sup>1</sup>y<sup>2</sup>dy = 1/3. The two agree, as the tower property requires.</p>
+<div class="example"><span class="exlabel">Example 3.35 (Bivariate normal, in brief).</span><p>For the bivariate normal with means μ<sub>1</sub>, μ<sub>2</sub>, variances σ<sub>1</sub><sup>2</sup>, σ<sub>2</sub><sup>2</sup> and correlation ρ, state the conditional distribution of Y given X = x.</p></div>
+<p>The joint density is the exponential of a quadratic form, and completing the square in y gives f<sub>Y|X</sub>(y|x) = normal with mean μ<sub>2</sub> + ρ(σ<sub>2</sub>/σ<sub>1</sub>)(x − μ<sub>1</sub>) and variance σ<sub>2</sub><sup>2</sup>(1 − ρ<sup>2</sup>). Two facts follow: the conditional mean is <strong>linear</strong> in x, with slope ρσ<sub>2</sub>/σ<sub>1</sub> — this is the population regression line; and the conditional variance does not depend on x, which is the homoscedasticity that makes the normal model so convenient. When ρ = 0 the conditional distribution equals the marginal, recovering independence, which for the bivariate normal is equivalent to zero correlation — a property unique to the normal family.</p>
+<h2 class="sec-head" id="s34">3.12  Practice Problems with Solutions</h2>
+<div class="num-item"><span class="num">1.</span><div><strong>Problem.</strong> (X, Y) is uniform on the unit square. Find P(X + Y &lt; 1) and P(X<sup>2</sup> + Y<sup>2</sup> &lt; 1).</div></div>
+<p><strong>Solution.</strong> The density is 1. The first region is a triangle of area 1/2, so the probability is 1/2. The second is a quarter disc of radius 1, of area π/4, so the probability is π/4 ≈ 0.7854.</p>
+<div class="num-item"><span class="num">2.</span><div><strong>Problem.</strong> Let f(x, y) = c x y on 0 &lt; x &lt; 2, 0 &lt; y &lt; 1. Find c and the marginal densities.</div></div>
+<p><strong>Solution.</strong> ∫<sub>0</sub><sup>2</sup>∫<sub>0</sub><sup>1</sup>cxy dy dx = c(2)(1/2) = c, so c = 1. Then f<sub>X</sub>(x) = ∫<sub>0</sub><sup>1</sup>xy dy = x/2 on (0,2), and f<sub>Y</sub>(y) = ∫<sub>0</sub><sup>2</sup>xy dx = 2y on (0,1). Both integrate to 1, and the joint factorises, so X and Y are independent.</p>
+<div class="num-item"><span class="num">3.</span><div><strong>Problem.</strong> X, Y are independent with X ~ U(0,1) and Y ~ U(0,1). Find the density of Z = X − Y.</div></div>
+<p><strong>Solution.</strong> By convolution applied to X and −Y, whose density is 1 on (−1, 0): f<sub>Z</sub>(z) = ∫ f<sub>X</sub>(x)f<sub>−Y</sub>(z−x)dx. For −1 &lt; z &lt; 0 this gives 1 + z, and for 0 ≤ z &lt; 1 it gives 1 − z. So f<sub>Z</sub>(z) = 1 − |z| on (−1, 1), a symmetric triangle with mean 0 and variance 1/6, consistent with Var(X−Y) = 1/12 + 1/12.</p>
+<div class="num-item"><span class="num">4.</span><div><strong>Problem.</strong> X, Y are independent N(0,1). Find P(X &lt; Y) and P(X<sup>2</sup> + Y<sup>2</sup> &lt; 1).</div></div>
+<p><strong>Solution.</strong> By symmetry, X − Y is symmetric about 0, so P(X &lt; Y) = 1/2. For the second, use polar coordinates: X<sup>2</sup> + Y<sup>2</sup> = R<sup>2</sup> where R<sup>2</sup> ~ Exp(1/2) as in Example 3.10, so P(R<sup>2</sup> &lt; 1) = 1 − e<sup>−1/2</sup> ≈ 0.3935. Equivalently, X<sup>2</sup> + Y<sup>2</sup> ~ χ<sup>2</sup> with 2 degrees of freedom.</p>
+<div class="num-item"><span class="num">5.</span><div><strong>Problem.</strong> Find Cov(X, Y) when f(x,y) = 2 on the triangle 0 &lt; x &lt; y &lt; 1.</div></div>
+<p><strong>Solution.</strong> E[Y] = 2/3 from Example 3.34 and E[X] = 1/3. Also E[XY] = ∫<sub>0</sub><sup>1</sup>∫<sub>0</sub><sup>y</sup>2xy dx dy = ∫<sub>0</sub><sup>1</sup>y<sup>3</sup>dy = 1/4. So Cov(X,Y) = 1/4 − (1/3)(2/3) = 1/4 − 2/9 = 1/36. Positive, as expected: larger x forces y to be larger because of the constraint x &lt; y.</p>
+<div class="num-item"><span class="num">6.</span><div><strong>Problem.</strong> X ~ Gamma(2, λ) and Y ~ Gamma(3, λ) are independent. Find the distribution of X + Y.</div></div>
+<p><strong>Solution.</strong> By the mgf (or by Example 3.16), M<sub>X+Y</sub>(t) = (λ/(λ−t))<sup>2</sup>(λ/(λ−t))<sup>3</sup> = (λ/(λ−t))<sup>5</sup>, so X + Y ~ Gamma(5, λ). Then E[X+Y] = 5/λ and Var(X+Y) = 5/λ<sup>2</sup>, agreeing with 2/λ + 3/λ and 2/λ<sup>2</sup> + 3/λ<sup>2</sup>.</p>
+<div class="num-item"><span class="num">7.</span><div><strong>Problem.</strong> Let X, Y be independent with mgfs M<sub>X</sub>, M<sub>Y</sub>. Find the mgf of Z = 3X − 2Y + 1.</div></div>
+<p><strong>Solution.</strong> M<sub>Z</sub>(t) = e<sup>t</sup>M<sub>3X</sub>(t)M<sub>−2Y</sub>(t) = e<sup>t</sup>M<sub>X</sub>(3t)M<sub>Y</sub>(−2t). The signs enter through the arguments, not through the prefactor. Then E[Z] = M<sub>Z</sub>′(0) = 1 + 3E[X] − 2E[Y], which is the linearity of expectation recovered.</p>
+<div class="num-item"><span class="num">8.</span><div><strong>Problem.</strong> Show that if X and Y are independent with finite variances then Var(XY) = E[X<sup>2</sup>]E[Y<sup>2</sup>] − (E[X])<sup>2</sup>(E[Y])<sup>2</sup>.</div></div>
+<p><strong>Solution.</strong> By independence, E[(XY)<sup>2</sup>] = E[X<sup>2</sup>]E[Y<sup>2</sup>] and E[XY] = E[X]E[Y]. So Var(XY) = E[X<sup>2</sup>]E[Y<sup>2</sup>] − (E[X]E[Y])<sup>2</sup>. A useful corollary: if both have mean zero, Var(XY) = Var(X)Var(Y).</p>
+<div class="num-item"><span class="num">9.</span><div><strong>Problem.</strong> X and Y have joint density f(x,y) = e<sup>−y</sup> for 0 &lt; x &lt; y &lt; ∞. Find the marginals and E[X|Y = y].</div></div>
+<p><strong>Solution.</strong> f<sub>Y</sub>(y) = ∫<sub>0</sub><sup>y</sup>e<sup>−y</sup>dx = y e<sup>−y</sup> for y &gt; 0, which is Gamma(2, 1). f<sub>X</sub>(x) = ∫<sub>x</sub><sup>∞</sup>e<sup>−y</sup>dy = e<sup>−x</sup> for x &gt; 0, which is Exp(1). Then f<sub>X|Y</sub>(x|y) = e<sup>−y</sup>/(ye<sup>−y</sup>) = 1/y on (0,y), so E[X|Y=y] = y/2 and E[X|Y] = Y/2, giving E[X] = E[Y]/2 = 1. This is the two-dimensional version of the memoryless property: given that the second arrival happened at y, the first is uniform on (0,y).</p>
+<div class="num-item"><span class="num">10.</span><div><strong>Problem.</strong> Let X ~ U(0,1). Find the characteristic function of X and use it to find E[X].</div></div>
+<p><strong>Solution.</strong> φ(t) = ∫<sub>0</sub><sup>1</sup>e<sup>itx</sup>dx = (e<sup>it</sup> − 1)/(it). As t → 0 this tends to 1 (expand the exponential), so φ(0) = 1. Then E[X] = φ′(0)/i. Differentiating the quotient and taking the limit gives φ′(0) = i/2, so E[X] = 1/2, as expected. Note the removable singularity at t = 0, which is why the cf of the uniform is defined to be 1 there.</p>
+<div class="num-item"><span class="num">11.</span><div><strong>Problem.</strong> X and Y are independent standard normals. Find E[max(X,Y)] and E[min(X,Y)].</div></div>
+<p><strong>Solution.</strong> Since max + min = X + Y, we get E[max] + E[min] = 0. By symmetry E[max] = −E[min] = E[|X|] (to see this, note max(X,Y) = (X+Y+|X−Y|)/2 and X − Y ~ N(0,2), so E[max] = E|X−Y|/2 = √(2/π) · √2/2 = 1/√π). Hence E[max] = 1/√π ≈ 0.5642 and E[min] = −1/√π.</p>
+<div class="num-item"><span class="num">12.</span><div><strong>Problem.</strong> Use a Jacobian to find the joint density of U = X + Y and V = X/(X+Y) for independent Gamma(α,λ) and Gamma(β,λ) variables.</div></div>
+<p><strong>Solution.</strong> The inverse map is x = uv, y = u(1−v). Its partial derivatives are ∂x/∂u = v, ∂x/∂v = u, ∂y/∂u = 1−v, ∂y/∂v = −u, so J = v(−u) − u(1−v) = −uv − u + uv = −u, giving |J| = u. Then f<sub>U,V</sub>(u,v) = f<sub>X</sub>(uv)f<sub>Y</sub>(u(1−v)) · u = [λ<sup>α+β</sup>u<sup>α+β−1</sup>e<sup>−λu</sup>/Γ(α+β)] · [Γ(α+β)/(Γ(α)Γ(β))] v<sup>α−1</sup>(1−v)<sup>β−1</sup>. The joint density factorises, so U ~ Gamma(α+β, λ) and V ~ Beta(α, β) are <strong>independent</strong>. This is the classical proof that a gamma variable splits into an independent gamma and an independent beta, and it is why the beta distribution is the natural prior for a proportion.</p>
+<h2 class="sec-head" id="s35">3.13  Formula Summary — Module 3</h2>
+<div class="table-wrap"><table><thead><tr><th>Concept</th><th>Formula</th></tr></thead><tbody>
+<tr><td>Joint cdf</td><td>F(x,y) = P(X ≤ x, Y ≤ y)</td></tr>
+<tr><td>Rectangle probability</td><td>F(b,d) − F(a,d) − F(b,c) + F(a,c)</td></tr>
+<tr><td>Joint density</td><td>f(x,y) = ∂<sup>2</sup>F/∂x∂y;  P((X,Y) ∈ A) = ∫∫<sub>A</sub> f</td></tr>
+<tr><td>Marginals</td><td>f<sub>X</sub>(x) = ∫ f(x,y)dy;  p<sub>X</sub>(x) = Σ<sub>y</sub>p(x,y)</td></tr>
+<tr><td>Conditional density</td><td>f<sub>Y|X</sub>(y|x) = f(x,y)/f<sub>X</sub>(x)</td></tr>
+<tr><td>Conditional mean</td><td>E[Y|X=x] = ∫ y f<sub>Y|X</sub>(y|x)dy</td></tr>
+<tr><td>Tower property</td><td>E[Y] = E[E[Y|X]]</td></tr>
+<tr><td>Total variance</td><td>Var(Y) = E[Var(Y|X)] + Var(E[Y|X])</td></tr>
+<tr><td>Independence</td><td>f(x,y) = f<sub>X</sub>(x)f<sub>Y</sub>(y);  F(x,y) = F<sub>X</sub>(x)F<sub>Y</sub>(y)</td></tr>
+<tr><td>Independence ⇒</td><td>E[XY] = E[X]E[Y] and Cov = 0 (not conversely)</td></tr>
+<tr><td>Jacobian transform</td><td>f<sub>U,V</sub>(u,v) = f<sub>X,Y</sub>(x(u,v),y(u,v)) |∂(x,y)/∂(u,v)|</td></tr>
+<tr><td>Polar coordinates</td><td>dx dy = r dr dθ</td></tr>
+<tr><td>Convolution (discrete)</td><td>p<sub>Z</sub>(z) = Σ<sub>x</sub> p<sub>X</sub>(x)p<sub>Y</sub>(z−x)</td></tr>
+<tr><td>Convolution (continuous)</td><td>f<sub>Z</sub>(z) = ∫ f<sub>X</sub>(x)f<sub>Y</sub>(z−x)dx</td></tr>
+<tr><td>Max / min (iid)</td><td>F<sub>max</sub> = F<sup>n</sup>;  F<sub>min</sub> = 1 − (1−F)<sup>n</sup></td></tr>
+<tr><td>Order statistic</td><td>X<sub>(k)</sub> ~ Beta(k, n−k+1) for uniform parents</td></tr>
+<tr><td>Covariance</td><td>Cov(X,Y) = E[XY] − E[X]E[Y]</td></tr>
+<tr><td>Variance of sum</td><td>Var(X±Y) = Var(X) + Var(Y) ± 2Cov(X,Y)</td></tr>
+<tr><td>Correlation</td><td>ρ = Cov/(σ<sub>X</sub>σ<sub>Y</sub>),  −1 ≤ ρ ≤ 1</td></tr>
+<tr><td>MGF</td><td>M(t) = E[e<sup>tX</sup>];  E[X<sup>k</sup>] = M<sup>(k)</sup>(0)</td></tr>
+<tr><td>MGF of a sum</td><td>M<sub>X+Y</sub> = M<sub>X</sub>M<sub>Y</sub> (independence)</td></tr>
+<tr><td>MGF linear</td><td>M<sub>aX+b</sub>(t) = e<sup>bt</sup>M<sub>X</sub>(at)</td></tr>
+<tr><td>Characteristic function</td><td>φ(t) = E[e<sup>itX</sup>] = M(it)</td></tr>
+<tr><td>CF of a sum</td><td>φ<sub>X+Y</sub> = φ<sub>X</sub>φ<sub>Y</sub></td></tr>
+<tr><td>CF moments</td><td>φ<sup>(k)</sup>(0) = i<sup>k</sup>E[X<sup>k</sup>]</td></tr>
+<tr><td>CF inversion</td><td>f(x) = (1/2π)∫ e<sup>−itx</sup>φ(t)dt</td></tr>
+</tbody></table></div>
+</section>
+</section>
+
+<div class="foot">
+  Stochastic Models · Class Notes, Modules 1–3 · 35 sections · Definitions, theorems, worked examples, practice problems and formula summaries
+</div>
+
+</div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+(function(){
+  const toc = document.getElementById('toc');
+  const links = Array.from(toc.querySelectorAll('a'));
+  const sections = links.map(l => {
+    const id = l.getAttribute('href').slice(1);
+    return { el: document.getElementById(id), link: l };
+  }).filter(s => s.el);
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      links.forEach(l => l.classList.remove('active'));
+      const match = sections.find(s => s.el === entry.target);
+      if (match) {
+        match.link.classList.add('active');
+        if (window.innerWidth <= 1000) {
+          match.link.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+        }
+      }
+    });
+  }, { rootMargin:'-8% 0px -82% 0px' });
+
+  sections.forEach(s => observer.observe(s.el));
+})();
+</script>
+</body>
+</html>
